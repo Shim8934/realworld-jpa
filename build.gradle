@@ -1,14 +1,19 @@
 plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.1.1'
-    id 'io.spring.dependency-management' version '1.1.0'
+    id "java"
+    id "jacoco"
+    id "org.springframework.boot" version "3.0.5"
+    id "io.spring.dependency-management" version "1.1.0"
 }
 
-group = 'com.io'
-version = '0.0.1-SNAPSHOT'
+group = "com.io"
+version = "0.0.1-SNAPSHOT"
 
 java {
-    sourceCompatibility = '17'
+    sourceCompatibility = "17"
+}
+
+jacoco {
+    toolVersion = "0.8.5"
 }
 
 configurations {
@@ -22,20 +27,94 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'com.h2database:h2'
-    runtimeOnly 'org.postgresql:postgresql'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-data-jdbc"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation "org.springframework.boot:spring-boot-starter-jdbc"
+    implementation "org.springframework.boot:spring-boot-starter-oauth2-resource-server"
+    implementation "com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0"
+    implementation "org.springframework.boot:spring-boot-starter-security"
+    implementation "com.github.ulisesbocchio:jasypt-spring-boot:3.0.4"
+
+    implementation "commons-io:commons-io:2.11.0"
+    implementation "org.apache.commons:commons-lang3:3.12.0"
+    implementation "com.google.guava:guava:31.1-jre"
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    compileOnly "org.projectlombok:lombok"
+    compileOnly 'com.google.code.findbugs:annotations:3.0.1'
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.1'
+
+    developmentOnly "org.springframework.boot:spring-boot-devtools"
+
+    runtimeOnly "com.h2database:h2"
+    runtimeOnly "org.postgresql:postgresql"
+
+    annotationProcessor "org.projectlombok:lombok"
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.springframework.security:spring-security-test"
 }
 
-tasks.named('test') {
+
+tasks.withType(Test).configureEach {
+    jacoco.includeNoLocationClasses = true
+}
+
+test {
     useJUnitPlatform()
+    jacoco {
+        destinationFile = file("$buildDir/jacoco/jacoco.exec")
+    }
+    finalizedBy 'jacocoTestReport'
+}
+
+jacocoTestReport {
+    reports {
+        // 원하는 리포트를 켜고 끌 수 있습니다.
+        html.enabled true
+        csv.enabled false
+        xml.enabled false
+
+        //  각 리포트 타입 마다 리포트 저장 경로를 설정할 수 있습니다.
+        html.destination file("$buildDir/jacocoHtml")
+//        csv.destination file("$buildDir/jacocoCsv")
+        finalizedBy 'jacocoTestCoverageVerification'
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = "CLASS"
+
+            limit {
+                minimum = 0.30
+            }
+        }
+
+        rule {
+            enabled = true
+            element = "CLASS"
+
+            limit {
+                counter = "BRANCH"
+                value = "COVEREDRATIO"
+                minimum = 0.70
+            }
+
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = 0.70
+            }
+
+            limit {
+                counter = "LINE"
+                value = "TOTALCOUNT"
+                maximum = 200
+            }
+        }
+    }
 }
