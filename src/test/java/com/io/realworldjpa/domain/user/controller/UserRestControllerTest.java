@@ -7,13 +7,18 @@ import com.io.realworldjpa.domain.user.model.UserPostRequest;
 import com.io.realworldjpa.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -50,6 +55,15 @@ class UserRestControllerTest {
                 .andExpect(model().attribute("user", Map.of("user", new LoginRequest("testEmail5@example.com", "testPassword"))))
                 .andDo(print());
     }
+    @ParameterizedTest
+    @MethodSource("invalidPostRequest")
+    @DisplayName("POST /api/users/login - Invalid Request")
+    void post_user_with_invalid_request_expect_badRequest_status(UserPostRequest userPostRequest) throws Exception {
+        mockMvc.perform(post("/api/users")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(userPostRequest)))
+                .andExpect(status().isBadRequest());
+    }
 
     @Test
     @DisplayName("POST /api/users/login")
@@ -76,5 +90,11 @@ class UserRestControllerTest {
                 .andDo(print());
     }
 
-
+    private static Stream<Arguments> invalidPostRequest() {
+        return Stream.of(
+                Arguments.of(new UserPostRequest("not-email", "username", "password")),
+                Arguments.of(new UserPostRequest("user@email.com", "", "password")),
+                Arguments.of(new UserPostRequest("user@email.com", "username", ""))
+        );
+    }
 }

@@ -13,7 +13,7 @@ java {
 }
 
 jacoco {
-    toolVersion = "0.8.5"
+    toolVersion = "0.8.9"
 }
 
 configurations {
@@ -58,10 +58,6 @@ dependencies {
 }
 
 
-tasks.withType(Test).configureEach {
-    jacoco.includeNoLocationClasses = true
-}
-
 test {
     useJUnitPlatform()
     jacoco {
@@ -71,6 +67,7 @@ test {
 }
 
 jacocoTestReport {
+    dependsOn test
     reports {
         // 원하는 리포트를 켜고 끌 수 있습니다.
         html.enabled true
@@ -82,6 +79,10 @@ jacocoTestReport {
 //        csv.destination file("$buildDir/jacocoCsv")
         finalizedBy 'jacocoTestCoverageVerification'
     }
+}
+
+compileJava {
+    dependsOn clean
 }
 
 jacocoTestCoverageVerification {
