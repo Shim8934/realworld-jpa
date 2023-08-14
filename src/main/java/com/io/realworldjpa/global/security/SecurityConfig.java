@@ -1,50 +1,47 @@
 package com.io.realworldjpa.global.security;
 
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
+import com.io.realworldjpa.global.config.ExceptionHandleFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
-import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
-
 @Configuration
+@EnableMethodSecurity
 @EnableWebSecurity(debug = true)
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final JwtConfig jwtConfig;
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtHandleFilter jwtHandleFilter) throws Exception {
-        return http.httpBasic(AbstractHttpConfigurer::disable)
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, ExceptionHandleFilter exceptionHandleFilter) throws Exception {
+        http.httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .cors(SecurityConfigurerAdapter::and)
+
                 .authorizeHttpRequests(
                         requests -> requests.requestMatchers(HttpMethod.POST, "/api/users", "/api/users/login")
                                 .permitAll()
@@ -58,14 +55,13 @@ public class SecurityConfig {
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated())
-                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
-                .exceptionHandling(
-                        handler -> handler.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
-                                .accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
-                .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
 
-                .addFilterBefore(jwtHandleFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+                .addFilterBefore(exceptionHandleFilter, UsernamePasswordAuthenticationFilter.class)
+
+                .oauth2ResourceServer()
+                .jwt();
+
+        return http.build();
     }
 
     @Bean
@@ -89,16 +85,24 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtDecoder jwtDecoder(@Value("${security.key.public}") RSAPublicKey rsaPublicKey) {
-        return NimbusJwtDecoder.withPublicKey(rsaPublicKey).build();
+    public JwtCustomProvider jwtProvider() {
+        return new JwtCustomProvider(getSHA512Hash(jwtConfig.getSecretKey()), jwtConfig.getIssuer(), jwtConfig.getExpMinute());
     }
 
     @Bean
-    public JwtEncoder jwtEncoder(
-            @Value("${security.key.public}") RSAPublicKey rsaPublicKey,
-            @Value("${security.key.private}") RSAPrivateKey rsaPrivateKey) {
-        JWK jwk = new RSAKey.Builder(rsaPublicKey).privateKey(rsaPrivateKey).build();
-        JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
-        return new NimbusJwtEncoder(jwks);
+    public JwtDecoder jwtDecoder() {
+        MacAlgorithm algorithm = MacAlgorithm.HS512;
+        return NimbusJwtDecoder.withSecretKey(new SecretKeySpec(getSHA512Hash(jwtConfig.getSecretKey()), algorithm.getName()))
+                .macAlgorithm(algorithm)
+                .build();
+    }
+
+    private static byte[] getSHA512Hash(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            return digest.digest(input.getBytes());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Cannot find SHA-512 algorithm", e);
+        }
     }
 }

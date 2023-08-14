@@ -1,6 +1,7 @@
 package com.io.realworldjpa.domain.user.service;
 
 import com.io.realworldjpa.domain.user.entity.Email;
+import com.io.realworldjpa.domain.user.entity.Password;
 import com.io.realworldjpa.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,8 +13,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmail(Email email);
 
-    Optional<User> findFirstByEmailAndPassword(Email email, String password);
+    Optional<User> findFirstByEmailAndPassword(Email email, Password password);
 
     Optional<User> findById(Long id);
 
+    boolean existsByProfileUsername(String username);
 }

@@ -1,17 +1,18 @@
 package com.io.realworldjpa.domain.user.service;
 
 import com.io.realworldjpa.domain.user.entity.Email;
+import com.io.realworldjpa.domain.user.entity.Password;
 import com.io.realworldjpa.domain.user.entity.Profile;
 import com.io.realworldjpa.domain.user.entity.User;
 import com.io.realworldjpa.domain.user.model.LoginRequest;
 import com.io.realworldjpa.domain.user.model.UserPostRequest;
+import com.io.realworldjpa.domain.user.model.UserPutRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +32,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public User login(LoginRequest loginRequest) {
         return userRepository.findFirstByEmail(new Email(loginRequest.email()))
-                .filter(user -> passwordEncoder.matches(loginRequest.password(), user.getPassword()))
+                .filter(user -> user.matchesPassword(loginRequest.password(), passwordEncoder))
                 .orElseThrow(() -> new IllegalArgumentException("적절하지 않은 Email(%s)입니다.".formatted(loginRequest.email())));
     }
 
@@ -41,11 +42,32 @@ public class UserService {
                 .orElseThrow(() -> new NoSuchElementException("적절하지 않은 요청입니다."));
     }
 
+    @Transactional
+    public User updateUser(User user, UserPutRequest putRequest) {
+        Email putEmail = new Email(putRequest.email());
+        if (user.getEmail().equals(putEmail) && userRepository.existsByEmail(putEmail)) {
+            throw new IllegalArgumentException("이미 존재하는 이메일 - ['%s'] 입니다.".formatted(putRequest.email()));
+        }
+
+        if (user.getProfile().getUsername().equals(putRequest.username()) && userRepository.existsByProfileUsername(putRequest.username())) {
+            throw new IllegalArgumentException("이미 존재하는 이름 - ['%s'] 입니다.".formatted(putRequest.username()));
+        }
+
+        user.updateEmail(putEmail);
+        user.updateUsername(putRequest.username());
+        user.updateBio(putRequest.bio());
+        user.updatePassword(Password.of(putRequest.password(), passwordEncoder));
+        user.updateImage(putRequest.image());
+
+        return user;
+    }
+
     private User createNewUser(UserPostRequest userPostRequest) {
         return new User.Builder()
                 .email(new Email(userPostRequest.email()))
                 .profile(new Profile(userPostRequest.username()))
-                .password(passwordEncoder.encode(userPostRequest.password()))
+                .password(Password.of(userPostRequest.password(), passwordEncoder))
                 .build();
     }
+
 }
