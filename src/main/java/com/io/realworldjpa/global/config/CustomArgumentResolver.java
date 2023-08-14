@@ -1,4 +1,4 @@
-package com.io.realworldjpa.global.security;
+package com.io.realworldjpa.global.config;
 
 import com.io.realworldjpa.domain.user.entity.User;
 import com.io.realworldjpa.domain.user.service.UserRepository;
@@ -16,7 +16,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 @RequiredArgsConstructor
-public class UserArgumentResolver implements HandlerMethodArgumentResolver {
+public class CustomArgumentResolver implements HandlerMethodArgumentResolver {
     private final UserRepository userRepository;
 
     @Override
@@ -38,12 +38,12 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
         }
 
         JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
-        String userId = jwtAuthenticationToken.getName().strip();
+        long userId = Long.parseLong(jwtAuthenticationToken.getName());
         String token = jwtAuthenticationToken.getToken().getTokenValue().strip();
 
         return userRepository
-                .findById(Long.parseLong(userId))
+                .findById(userId)
                 .map(user -> user.setToken(token))
-                .orElseThrow(() -> new InvalidBearerTokenException("유효하지 않은 토큰 : `%s`".formatted(token)));
+                .orElseThrow(() -> new InvalidBearerTokenException("유효하지 않은 토큰입니다. [`%s`] ".formatted(token)));
     }
 }

@@ -1,8 +1,5 @@
-package com.io.realworldjpa.global.config;
+package com.io.realworldjpa.global.util;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.*;

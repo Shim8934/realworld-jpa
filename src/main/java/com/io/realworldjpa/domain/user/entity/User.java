@@ -1,11 +1,12 @@
 package com.io.realworldjpa.domain.user.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -13,7 +14,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static jakarta.persistence.CascadeType.REMOVE;
 import static jakarta.persistence.GenerationType.IDENTITY;
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Entity
@@ -32,8 +33,8 @@ public class User {
     @Embedded
     private Profile profile;
 
-    @Column(name = "password")
-    private String password;
+    @Embedded
+    private Password password;
 
     @Transient
     private String token;
@@ -47,11 +48,11 @@ public class User {
     @OneToMany(cascade = REMOVE)
     private Set<User> followingUsers = new HashSet<>();
 
-    public User(Email email, String password, Profile profile) {
+    public User(Email email, Password password, Profile profile) {
         this(null, email, password, profile, null, false);
     }
 
-    private User(Long id, Email email, String password, Profile profile, String token, boolean anonymous) {
+    private User(Long id, Email email, Password password, Profile profile, String token, boolean anonymous) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -76,8 +77,16 @@ public class User {
         return profile;
     }
 
-    public String getPassword() {
+    public Password getPassword() {
         return password;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public boolean matchesPassword(String rawPassword, PasswordEncoder passwordEncoder) {
+        return password.matchesPassword(rawPassword, passwordEncoder);
     }
 
     public User setToken(String token) {
@@ -90,10 +99,48 @@ public class User {
         return this. id == null && this.anonymous;
     }
 
+    public void updateEmail(Email email) {
+        if (this.email.equals(email)) {
+            return ;
+        }
+        this.email = email;
+    }
+
+    public void updateUsername(String username) {
+        if (isBlank(username) || this.profile.getUsername().equals(username)) {
+            return ;
+        }
+        this.profile.updateUsername(username);
+    }
+
+    public void updateBio(String bio) {
+        System.out.println("bio = " + bio);
+        if (isBlank(bio)) {
+            return ;
+        }
+        this.profile.updateBio(bio);
+    }
+
+    public void updatePassword(Password password) {
+        if (this.password.equals(password)) {
+            return ;
+        }
+        this.password = password;
+    }
+
+    public void updateImage(String image) {
+        if (isBlank(image)) {
+            return ;
+        }
+        this.profile.updateImage(image);
+    }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof User other && Objects.equals(this.id, other.id);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id.equals(user.id);
     }
 
     @Override
@@ -101,10 +148,20 @@ public class User {
         return Objects.hash(this.id);
     }
 
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("id", id)
+                .append("name", profile.getUsername())
+                .append("email", email.getAddress())
+                .append("password", "[PROTECTED]")
+                .toString();
+    }
+
     static public class Builder {
         private Long id;
         private Email email;
-        private String password;
+        private Password password;
         private Profile profile;
         private String token;
         private boolean anonymous;
@@ -131,7 +188,7 @@ public class User {
             return this;
         }
 
-        public Builder password(String password) {
+        public Builder password(Password password) {
             this.password = password;
             return this;
         }

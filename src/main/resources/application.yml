@@ -17,10 +17,11 @@ jasypt:
     bean: jasyptStringEncryptor
     password: vRA3AY4apMyOfJ8EtJVX
 
-security:
-  key:
-    private: classpath:app.key
-    public: classpath:app.pub
+realworld:
+  jwt:
+    secretKey: realworld_private_key
+    issuer: realworld_sky_server
+    expMinute: 30
 
 decorator:
   datasource:

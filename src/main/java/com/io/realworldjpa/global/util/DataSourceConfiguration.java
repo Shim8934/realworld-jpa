@@ -1,4 +1,4 @@
-package com.io.realworldjpa.global.config;
+package com.io.realworldjpa.global.util;
 
 import com.p6spy.engine.spy.P6SpyOptions;
 import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
