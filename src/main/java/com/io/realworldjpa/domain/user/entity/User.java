@@ -14,8 +14,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static jakarta.persistence.CascadeType.REMOVE;
 import static jakarta.persistence.GenerationType.IDENTITY;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 @Entity
 @Table(name = "users")
@@ -90,7 +89,7 @@ public class User {
     }
 
     public User setToken(String token) {
-        checkArgument(isNotBlank(token), "token must not be null or blank!");
+        checkArgument(isNotEmpty(token) || isNotBlank(token), "token must not be null or blank!");
         this.token = token;
         return this;
     }
@@ -100,38 +99,22 @@ public class User {
     }
 
     public void updateEmail(Email email) {
-        if (this.email.equals(email)) {
-            return ;
-        }
         this.email = email;
     }
 
     public void updateUsername(String username) {
-        if (isBlank(username) || this.profile.getUsername().equals(username)) {
-            return ;
-        }
         this.profile.updateUsername(username);
     }
 
     public void updateBio(String bio) {
-        System.out.println("bio = " + bio);
-        if (isBlank(bio)) {
-            return ;
-        }
         this.profile.updateBio(bio);
     }
 
     public void updatePassword(Password password) {
-        if (this.password.equals(password)) {
-            return ;
-        }
         this.password = password;
     }
 
     public void updateImage(String image) {
-        if (isBlank(image)) {
-            return ;
-        }
         this.profile.updateImage(image);
     }
 

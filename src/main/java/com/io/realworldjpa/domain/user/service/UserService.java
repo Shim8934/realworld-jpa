@@ -14,6 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -24,6 +28,7 @@ public class UserService {
 
     @Transactional
     public User signUp(UserPostRequest userPostRequest) {
+        checkArgument(isNotEmpty(userPostRequest.password()), "password must not be null or blank!");
         if (userRepository.existsByEmail(new Email(userPostRequest.email()))) {
             throw new IllegalArgumentException("이미 존재하는 Email(%s) 입니다.".formatted(userPostRequest.email()));
         };
@@ -31,6 +36,7 @@ public class UserService {
     }
     @Transactional(readOnly = true)
     public User login(LoginRequest loginRequest) {
+        checkArgument(isNotEmpty(loginRequest.password()), "password must not be null or blank!");
         return userRepository.findFirstByEmail(new Email(loginRequest.email()))
                 .filter(user -> user.matchesPassword(loginRequest.password(), passwordEncoder))
                 .orElseThrow(() -> new IllegalArgumentException("적절하지 않은 Email(%s)입니다.".formatted(loginRequest.email())));
@@ -44,16 +50,17 @@ public class UserService {
 
     @Transactional
     public User updateUser(User user, UserPutRequest putRequest) {
+        checkArgument(isNotEmpty(putRequest.email()) || isNotBlank(putRequest.email()), "email must not be null or blank!");
+        checkArgument(isNotEmpty(putRequest.password()), "password must be provided.");
+
         Email putEmail = new Email(putRequest.email());
-        if (user.getEmail().equals(putEmail) && userRepository.existsByEmail(putEmail)) {
+        if (!user.getEmail().equals(putEmail) && userRepository.existsByEmail(putEmail)) {
             throw new IllegalArgumentException("이미 존재하는 이메일 - ['%s'] 입니다.".formatted(putRequest.email()));
         }
-
-        if (user.getProfile().getUsername().equals(putRequest.username()) && userRepository.existsByProfileUsername(putRequest.username())) {
-            throw new IllegalArgumentException("이미 존재하는 이름 - ['%s'] 입니다.".formatted(putRequest.username()));
+        else {
+            user.updateEmail(putEmail);
         }
 
-        user.updateEmail(putEmail);
         user.updateUsername(putRequest.username());
         user.updateBio(putRequest.bio());
         user.updatePassword(Password.of(putRequest.password(), passwordEncoder));

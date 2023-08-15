@@ -2,9 +2,12 @@ package com.io.realworldjpa.domain.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.realworldjpa.IntegrationTest;
+import com.io.realworldjpa.domain.user.entity.User;
 import com.io.realworldjpa.domain.user.model.LoginRequest;
 import com.io.realworldjpa.domain.user.model.UserPostRequest;
+import com.io.realworldjpa.domain.user.model.UserPutRequest;
 import com.io.realworldjpa.domain.user.service.UserService;
+import com.io.realworldjpa.global.security.JwtCustomProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,7 +22,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -31,6 +34,9 @@ class UserRestControllerTest {
     private UserService userService;
 
     @Autowired
+    private JwtCustomProvider jwtCustomProvider;
+
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
@@ -40,7 +46,7 @@ class UserRestControllerTest {
     @DisplayName("POST /api/users")
     void post_registUser() throws Exception {
         // given
-        UserPostRequest userPostRequest = new UserPostRequest("testUsername5", "testEmail5@example.com", "testPassword");
+        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testEmail", "testPassword");
 
         // when
         ResultActions resultActions = mockMvc.perform(post("/api/users")
@@ -52,7 +58,7 @@ class UserRestControllerTest {
                 .andExpect(status().isTemporaryRedirect())
                 .andExpect(view().name("redirect:/api/users/login"))
                 .andExpect(model().attributeExists("user"))
-                .andExpect(model().attribute("user", Map.of("user", new LoginRequest("testEmail5@example.com", "testPassword"))))
+                .andExpect(model().attribute("user", Map.of("user", new LoginRequest("testEmail10@example.com", "testPassword"))))
                 .andDo(print());
     }
     @ParameterizedTest
@@ -68,11 +74,14 @@ class UserRestControllerTest {
     @Test
     @DisplayName("POST /api/users/login")
     void post_loginUser() throws Exception {
-        UserPostRequest userPostRequest = new UserPostRequest("testUsername10", "testEmail10@example.com", "testPassword");
+        // given
+        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword");
         userService.signUp(userPostRequest);
 
+        // when
         LoginRequest loginRequest = new LoginRequest("testEmail10@example.com", "testPassword");
 
+        // then
         ResultActions resultActions = mockMvc.perform(
                 post("/api/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -87,6 +96,91 @@ class UserRestControllerTest {
                 .andExpect(jsonPath("$.user.token").isNotEmpty())
                 .andExpect(jsonPath("$.user.bio").isEmpty())
                 .andExpect(jsonPath("$.user.image").isEmpty())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("GET /api/user")
+    void get_User() throws Exception {
+        // given
+        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword");
+        userService.signUp(userPostRequest);
+
+        LoginRequest loginRequest = new LoginRequest("testEmail10@example.com", "testPassword");
+        User testUser = userService.login(loginRequest);
+        String testToken = jwtCustomProvider.jwtFromUser(testUser);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(get("/api/user").header("Authorization", "Token " + testToken));
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.user.email").value("testEmail10@example.com"))
+                .andExpect(jsonPath("$.user.username").value("testUsername10"))
+                .andExpect(jsonPath("$.user.token").isNotEmpty())
+                .andExpect(jsonPath("$.user.bio").isEmpty())
+                .andExpect(jsonPath("$.user.image").isEmpty())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("PUT /api/user")
+    void put_User() throws Exception {
+        // given
+        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword");
+        userService.signUp(userPostRequest);
+
+        LoginRequest loginRequest = new LoginRequest("testEmail10@example.com", "testPassword");
+        User testUser = userService.login(loginRequest);
+        String testToken = jwtCustomProvider.jwtFromUser(testUser);
+
+        // when
+        UserPutRequest userPutRequest = new UserPutRequest("testEmail@example.com", "testUsername10", "testPassword", "testBio", "testImage.url");
+        ResultActions resultActions = mockMvc.perform(put("/api/user").header("Authorization", "Token " + testToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userPutRequest)));
+
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.user.email").value("testEmail@example.com"))
+                .andExpect(jsonPath("$.user.username").value("testUsername10"))
+                .andExpect(jsonPath("$.user.token").isNotEmpty())
+                .andExpect(jsonPath("$.user.bio").value("testBio"))
+                .andExpect(jsonPath("$.user.image").value("testImage.url"))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("PUT /api/user - Same Email")
+    public void put_User_withSameEmail_expect_NotEmailUpdate() throws Exception {
+        // given
+        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword");
+        userService.signUp(userPostRequest);
+
+        LoginRequest loginRequest = new LoginRequest("testEmail10@example.com", "testPassword");
+        User testUser = userService.login(loginRequest);
+        String testToken = jwtCustomProvider.jwtFromUser(testUser);
+
+        // when
+        UserPutRequest userPutRequest = new UserPutRequest("testEmail10@example.com", "testUsername10", "testPassword", "testBio", "testImage.url");
+        ResultActions resultActions = mockMvc.perform(put("/api/user").header("Authorization", "Token " + testToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userPutRequest)));
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.user.email").value("testEmail10@example.com"))
+                .andExpect(jsonPath("$.user.username").value("testUsername10"))
+                .andExpect(jsonPath("$.user.token").isNotEmpty())
+                .andExpect(jsonPath("$.user.bio").value("testBio"))
+                .andExpect(jsonPath("$.user.image").value("testImage.url"))
                 .andDo(print());
     }
 

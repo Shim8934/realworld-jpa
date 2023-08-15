@@ -8,5 +8,5 @@ import static com.fasterxml.jackson.annotation.JsonTypeInfo.As.WRAPPER_OBJECT;
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.NAME;
 
 @JsonRootName("user")
-public record UserPostRequest(String username, String email, String password) {
+public record UserPostRequest(String email, String username, String password) {
 }

@@ -3,7 +3,9 @@ package com.io.realworldjpa.domain.user.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.*;
 
 @Embeddable
 public class Profile {
@@ -20,7 +22,8 @@ public class Profile {
     protected Profile() {}
 
     private Profile(String username, String bio, String image) {
-        this.username = defaultIfNull(username, "");
+        checkArgument(isNotBlank(username), "username must not be null or blank!");
+        this.username = username;
         this.bio = bio;
         this.image = image;
     }
