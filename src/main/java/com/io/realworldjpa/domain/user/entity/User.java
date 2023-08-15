@@ -4,9 +4,12 @@ import jakarta.persistence.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -14,7 +17,8 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static jakarta.persistence.CascadeType.REMOVE;
 import static jakarta.persistence.GenerationType.IDENTITY;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Entity
 @Table(name = "users")
@@ -38,14 +42,14 @@ public class User {
     @Transient
     private String token;
 
-    @Transient
-    private boolean anonymous = false;
-
     @JoinTable(name = "users_followings",
             joinColumns = @JoinColumn(name = "follower_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "followee_id", referencedColumnName = "id"))
     @OneToMany(cascade = REMOVE)
     private Set<User> followingUsers = new HashSet<>();
+
+    @Transient
+    private boolean anonymous = false;
 
     public User(Email email, Password password, Profile profile) {
         this(null, email, password, profile, null, false);

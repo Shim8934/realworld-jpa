@@ -30,7 +30,7 @@ public class UserService {
     public User signUp(UserPostRequest userPostRequest) {
         checkArgument(isNotEmpty(userPostRequest.password()), "password must not be null or blank!");
         if (userRepository.existsByEmail(new Email(userPostRequest.email()))) {
-            throw new IllegalArgumentException("이미 존재하는 Email(%s) 입니다.".formatted(userPostRequest.email()));
+            throw new IllegalArgumentException("이미 존재하는 Email - ['%s'] 입니다.".formatted(userPostRequest.email()));
         };
         return userRepository.save( createNewUser(userPostRequest) );
     }
@@ -39,13 +39,7 @@ public class UserService {
         checkArgument(isNotEmpty(loginRequest.password()), "password must not be null or blank!");
         return userRepository.findFirstByEmail(new Email(loginRequest.email()))
                 .filter(user -> user.matchesPassword(loginRequest.password(), passwordEncoder))
-                .orElseThrow(() -> new IllegalArgumentException("적절하지 않은 Email(%s)입니다.".formatted(loginRequest.email())));
-    }
-
-    @Transactional(readOnly = true)
-    public User findById(long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("적절하지 않은 요청입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("적절하지 않은 Email - ['%s'] 입니다.".formatted(loginRequest.email())));
     }
 
     @Transactional
