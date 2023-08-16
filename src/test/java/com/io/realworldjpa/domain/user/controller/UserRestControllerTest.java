@@ -2,12 +2,10 @@ package com.io.realworldjpa.domain.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.realworldjpa.IntegrationTest;
-import com.io.realworldjpa.domain.user.entity.User;
 import com.io.realworldjpa.domain.user.model.LoginRequest;
 import com.io.realworldjpa.domain.user.model.UserPostRequest;
 import com.io.realworldjpa.domain.user.model.UserPutRequest;
 import com.io.realworldjpa.domain.user.service.UserService;
-import com.io.realworldjpa.global.security.JwtCustomProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,9 +30,6 @@ class UserRestControllerTest {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private JwtCustomProvider jwtCustomProvider;
 
     @Autowired
     private MockMvc mockMvc;
@@ -107,8 +102,7 @@ class UserRestControllerTest {
         userService.signUp(userPostRequest);
 
         LoginRequest loginRequest = new LoginRequest("testEmail10@example.com", "testPassword");
-        User testUser = userService.login(loginRequest);
-        String testToken = jwtCustomProvider.jwtFromUser(testUser);
+        String testToken = userService.login(loginRequest).token();
 
         // when
         ResultActions resultActions = mockMvc.perform(get("/api/user").header("Authorization", "Token " + testToken));
@@ -133,8 +127,7 @@ class UserRestControllerTest {
         userService.signUp(userPostRequest);
 
         LoginRequest loginRequest = new LoginRequest("testEmail10@example.com", "testPassword");
-        User testUser = userService.login(loginRequest);
-        String testToken = jwtCustomProvider.jwtFromUser(testUser);
+        String testToken = userService.login(loginRequest).token();
 
         // when
         UserPutRequest userPutRequest = new UserPutRequest("testEmail@example.com", "testUsername10", "testPassword", "testBio", "testImage.url");
@@ -163,8 +156,7 @@ class UserRestControllerTest {
         userService.signUp(userPostRequest);
 
         LoginRequest loginRequest = new LoginRequest("testEmail10@example.com", "testPassword");
-        User testUser = userService.login(loginRequest);
-        String testToken = jwtCustomProvider.jwtFromUser(testUser);
+        String testToken = userService.login(loginRequest).token();
 
         // when
         UserPutRequest userPutRequest = new UserPutRequest("testEmail10@example.com", "testUsername10", "testPassword", "testBio", "testImage.url");

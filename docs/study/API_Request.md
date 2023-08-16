@@ -72,6 +72,8 @@ Accepted fields: ``email``, ``username``, ``password``, ``image``, ``bio``
 
 Authentication optional, returns a Profile
 
+---
+
 #### Follow user
 ``POST /api/profiles/:username/follow``
 

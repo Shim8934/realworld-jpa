@@ -8,14 +8,12 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static jakarta.persistence.CascadeType.REMOVE;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -39,14 +37,18 @@ public class User {
     @Embedded
     private Password password;
 
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
     @Transient
     private String token;
 
-    @JoinTable(name = "users_followings",
-            joinColumns = @JoinColumn(name = "follower_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "followee_id", referencedColumnName = "id"))
-    @OneToMany(cascade = REMOVE)
-    private Set<User> followingUsers = new HashSet<>();
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "from", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Follow> following = new HashSet<>();
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "to", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Follow> follower = new HashSet<>();
 
     @Transient
     private boolean anonymous = false;
@@ -97,6 +99,8 @@ public class User {
         this.token = token;
         return this;
     }
+
+
 
     public boolean isAnonymous() {
         return this. id == null && this.anonymous;

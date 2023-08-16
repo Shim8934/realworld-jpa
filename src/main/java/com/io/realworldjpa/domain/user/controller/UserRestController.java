@@ -1,12 +1,12 @@
 package com.io.realworldjpa.domain.user.controller;
 
 import com.io.realworldjpa.domain.user.entity.User;
+import com.io.realworldjpa.domain.user.entity.UserDto;
 import com.io.realworldjpa.domain.user.model.LoginRequest;
 import com.io.realworldjpa.domain.user.model.UserPostRequest;
 import com.io.realworldjpa.domain.user.model.UserPutRequest;
 import com.io.realworldjpa.domain.user.model.UserRecord;
 import com.io.realworldjpa.domain.user.service.UserService;
-import com.io.realworldjpa.global.security.JwtCustomProvider;
 import com.nimbusds.jose.JOSEException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +25,6 @@ import static org.springframework.http.HttpStatus.CREATED;
 public class UserRestController {
 
     private final UserService userService;
-    private final JwtCustomProvider jwtCustomProvider;
-
 
     @PostMapping("/users")
     public ModelAndView registUser(@RequestBody UserPostRequest userPostRequest, HttpServletRequest httpServletRequest) {
@@ -40,19 +38,19 @@ public class UserRestController {
     @ResponseStatus(CREATED)
     @PostMapping("/users/login")
     public UserRecord loginUser(@RequestBody LoginRequest loginRequest) throws JOSEException {
-        User loginUser = userService.login(loginRequest);
-
-        return new UserRecord(loginUser, jwtCustomProvider.jwtFromUser(loginUser));
+        UserDto loginDto = userService.login(loginRequest);
+        return new UserRecord(loginDto);
     }
 
     @GetMapping("/user")
     public UserRecord getUser(User getUser) {
-        return new UserRecord(getUser, getUser.getToken());
+        UserDto getUserDto = new UserDto(getUser, getUser.getToken());
+        return new UserRecord(getUserDto);
     }
 
     @PutMapping("/user")
     public UserRecord putUser(User updateUser, @RequestBody UserPutRequest putRequest) {
-        User putUser = userService.updateUser(updateUser, putRequest);
-        return new UserRecord(putUser, putUser.getToken());
+        UserDto putUserDto = userService.updateUser(updateUser, putRequest);
+        return new UserRecord(putUserDto);
     }
 }
