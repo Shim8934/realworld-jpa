@@ -1,8 +1,8 @@
 package com.io.realworldjpa.domain.user.entity;
 
+import com.io.realworldjpa.domain.article.entity.Article;
+import com.io.realworldjpa.domain.article.entity.ArticleFavorite;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.data.annotation.CreatedDate;
@@ -23,11 +23,11 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 @Entity
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Embedded
@@ -52,12 +52,13 @@ public class User {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "to", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Follow> follower = new HashSet<>();
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ArticleFavorite> favoriteArticles = new HashSet<>();
+
     @Transient
     private boolean anonymous = false;
 
-    public User(Email email, Password password, Profile profile) {
-        this(null, email, password, profile, null, false);
-    }
+    protected User() {}
 
     private User(Long id, Email email, Password password, Profile profile, String token, boolean anonymous) {
         this.id = id;
@@ -66,6 +67,10 @@ public class User {
         this.profile = profile;
         this.token = token;
         this.anonymous = anonymous;
+    }
+
+    public User(Email email, Password password, Profile profile) {
+        this(null, email, password, profile, null, false);
     }
 
     public static User anonymous() {
@@ -168,12 +173,54 @@ public class User {
         return follow.getTo().equals(this);
     }
 
+    public void favoriteArticle(Article article) {
+        if (article == null) {
+            throw new IllegalArgumentException("게시글이 존재하지 않습니다.");
+        }
+
+        if (isAlreadyFavorite(article)) {
+            return ;
+        }
+
+        ArticleFavorite articleFavorite = new ArticleFavorite(this, article);
+        addFavoriteArticleThisUser(articleFavorite);
+        addThisUserToFavoriteArticle(articleFavorite);
+    }
+
+    private void addFavoriteArticleThisUser(ArticleFavorite articleFavorite) {
+        this.favoriteArticles.add(articleFavorite);
+    }
+
+    private void addThisUserToFavoriteArticle(ArticleFavorite articleFavorite) {
+        articleFavorite.getArticle().getFavoriteUsers().add(articleFavorite);
+    }
+
+    public boolean isAlreadyFavorite(Article article) {
+        ArticleFavorite articleFavorite = new ArticleFavorite(this, article);
+        return this.favoriteArticles.stream().anyMatch(articleFavorite::equals);
+    }
+
+    public void unfavoriteArticle(Article article) {
+        if (article == null) {
+            throw new IllegalArgumentException("게시글이 존재하지 않습니다.");
+        }
+        findFavoriteArticle(article).ifPresent(
+                articleFavorite -> {
+                    this.favoriteArticles.remove(article);
+                    articleFavorite.getArticle().getFavoriteUsers().remove(articleFavorite);
+                }
+        );
+
+    }
+
+    private Optional<ArticleFavorite> findFavoriteArticle(Article article) {
+        return this.favoriteArticles.stream().filter(article::equalsArticle).findFirst();
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return id.equals(user.id);
+        return o instanceof User user
+                && Objects.equals(this.id, user.id);
     }
 
     @Override
