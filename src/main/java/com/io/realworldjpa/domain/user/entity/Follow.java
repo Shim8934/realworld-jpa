@@ -2,9 +2,12 @@ package com.io.realworldjpa.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -15,17 +18,15 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Table(name = "user_follow")
 @EntityListeners(AuditingEntityListener.class)
 @RequiredArgsConstructor
-public class Follow {
+public class Follow implements Serializable {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @MapsId("fromId")
     @JoinColumn(name = "from_id")
     @ManyToOne(fetch = LAZY)
     private User from;
 
-    @MapsId("toId")
     @JoinColumn(name = "to_id")
     @ManyToOne(fetch = LAZY)
     private User to;
@@ -52,9 +53,17 @@ public class Follow {
     }
 
     @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("id", id)
+                .append("from", from.getId())
+                .append("target", to.getId())
+                .toString();
+    }
+
+    @Override
     public boolean equals(Object o) {
         return o instanceof Follow other
-                && Objects.equals(this.id, other.id)
                 && Objects.equals(this.from, other.from)
                 && Objects.equals(this.to, other.to);
     }

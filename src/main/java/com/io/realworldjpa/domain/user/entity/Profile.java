@@ -28,8 +28,8 @@ public class Profile {
         this.image = image;
     }
 
-    public Profile(String username) {
-        this(username, null, null);
+    public static Profile of(String username, String bio, String image) {
+        return new Profile(username, bio, image);
     }
 
     public String getUsername() {

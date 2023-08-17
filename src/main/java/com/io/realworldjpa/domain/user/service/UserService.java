@@ -75,7 +75,7 @@ public class UserService {
     private User createNewUser(UserPostRequest userPostRequest) {
         return new User.Builder()
                 .email(new Email(userPostRequest.email()))
-                .profile(new Profile(userPostRequest.username()))
+                .profile(Profile.of(userPostRequest.username(), userPostRequest.bio(), userPostRequest.image()))
                 .password(Password.of(userPostRequest.password(), passwordEncoder))
                 .build();
     }

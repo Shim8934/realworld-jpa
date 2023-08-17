@@ -29,19 +29,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserRestControllerTest {
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private UserService userService;
 
     @Test
     @DisplayName("POST /api/users")
     void post_registUser() throws Exception {
         // given
-        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testEmail", "testPassword");
+        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword", "", "");
 
         // when
         ResultActions resultActions = mockMvc.perform(post("/api/users")
@@ -70,7 +68,7 @@ class UserRestControllerTest {
     @DisplayName("POST /api/users/login")
     void post_loginUser() throws Exception {
         // given
-        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword");
+        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword", "", "");
         userService.signUp(userPostRequest);
 
         // when
@@ -98,7 +96,7 @@ class UserRestControllerTest {
     @DisplayName("GET /api/user")
     void get_User() throws Exception {
         // given
-        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword");
+        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword", "", "");
         userService.signUp(userPostRequest);
 
         LoginRequest loginRequest = new LoginRequest("testEmail10@example.com", "testPassword");
@@ -123,7 +121,7 @@ class UserRestControllerTest {
     @DisplayName("PUT /api/user")
     void put_User() throws Exception {
         // given
-        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword");
+        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword", "", "");
         userService.signUp(userPostRequest);
 
         LoginRequest loginRequest = new LoginRequest("testEmail10@example.com", "testPassword");
@@ -152,7 +150,7 @@ class UserRestControllerTest {
     @DisplayName("PUT /api/user - Same Email")
     public void put_User_withSameEmail_expect_NotEmailUpdate() throws Exception {
         // given
-        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword");
+        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword", "", "");
         userService.signUp(userPostRequest);
 
         LoginRequest loginRequest = new LoginRequest("testEmail10@example.com", "testPassword");
@@ -178,9 +176,9 @@ class UserRestControllerTest {
 
     private static Stream<Arguments> invalidPostRequest() {
         return Stream.of(
-                Arguments.of(new UserPostRequest("not-email", "username", "password")),
-                Arguments.of(new UserPostRequest("user@email.com", "", "password")),
-                Arguments.of(new UserPostRequest("user@email.com", "username", ""))
+                Arguments.of(new UserPostRequest("not-email", "username", "password", "", "")),
+                Arguments.of(new UserPostRequest("user@email.com", "", "password", "", "")),
+                Arguments.of(new UserPostRequest("user@email.com", "username", "", "", ""))
         );
     }
 }

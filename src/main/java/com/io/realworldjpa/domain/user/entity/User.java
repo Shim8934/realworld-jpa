@@ -1,7 +1,8 @@
 package com.io.realworldjpa.domain.user.entity;
 
 import jakarta.persistence.*;
-import lombok.RequiredArgsConstructor;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.data.annotation.CreatedDate;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -21,7 +23,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 @Entity
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
     @Id
@@ -90,20 +92,26 @@ public class User {
         return token;
     }
 
+    public Set<Follow> getFollowing() {
+        return following;
+    }
+
+    public Set<Follow> getFollower() {
+        return follower;
+    }
+
     public boolean matchesPassword(String rawPassword, PasswordEncoder passwordEncoder) {
         return password.matchesPassword(rawPassword, passwordEncoder);
     }
 
     public User setToken(String token) {
-        checkArgument(isNotEmpty(token) || isNotBlank(token), "token must not be null or blank!");
+        checkArgument(isNotEmpty(token) || isNotBlank(token), "토큰이 존재하지 않습니다.");
         this.token = token;
         return this;
     }
 
-
-
     public boolean isAnonymous() {
-        return this. id == null && this.anonymous;
+        return this.id == null && this.anonymous;
     }
 
     public void updateEmail(Email email) {
@@ -124,6 +132,40 @@ public class User {
 
     public void updateImage(String image) {
         this.profile.updateImage(image);
+    }
+
+    public void followUser(User targetUser) {
+        if (targetUser == null || targetUser.isAnonymous()) {
+            throw new IllegalArgumentException("팔로우 대상이 존재하지 않습니다.");
+        }
+
+        if (isAlreadyFollow(targetUser)) {
+            return ;
+        }
+
+        Follow follow = new Follow(this, targetUser);
+        this.following.add(follow);
+        follow.getTo().getFollower().add(follow);
+    }
+
+    public boolean isAlreadyFollow(User to) {
+        Follow follow = new Follow(this, to);
+        return this.following.stream().anyMatch(follow::equals);
+    }
+
+    public void unfollowUser(User to) {
+        if (to == null || to.isAnonymous()) {
+            throw new IllegalArgumentException("팔로우 대상이 존재하지 않습니다.");
+        }
+        Optional<Follow> currentFollow = this.following.stream().filter(to::isFollowing).findFirst();
+        currentFollow.ifPresent(follow -> {
+            this.following.remove(follow);
+            this.follower.remove(follow);
+        });
+    }
+
+    private boolean isFollowing(Follow follow) {
+        return follow.getTo().equals(this);
     }
 
     @Override

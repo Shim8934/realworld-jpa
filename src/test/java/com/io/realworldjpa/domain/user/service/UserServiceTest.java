@@ -20,7 +20,6 @@ class UserServiceTest {
 
     @Autowired
     private UserService userService;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -28,7 +27,7 @@ class UserServiceTest {
     @DisplayName("UserService SignUp")
     void signUp() throws Exception {
         // given
-        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword");
+        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword", "", "");
 
         // when
         User user = userService.signUp(userPostRequest);
@@ -44,7 +43,7 @@ class UserServiceTest {
     @DisplayName("UserService Login")
     void login() throws Exception {
         // given
-        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword");
+        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword", "", "");
         userService.signUp(userPostRequest);
 
         // when
@@ -61,7 +60,7 @@ class UserServiceTest {
     @DisplayName("UserService Update")
     void updateUser() throws Exception {
         // given
-        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword");
+        UserPostRequest userPostRequest = new UserPostRequest("testEmail10@example.com", "testUsername10", "testPassword", "", "");
 
         // when
         User user = userService.signUp(userPostRequest);
