@@ -17,11 +17,11 @@ public class ArticleTag {
     private Long id;
 
     @JoinColumn(name = "article_id")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Article article;
 
     @JoinColumn(name = "tag_id")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Tag tag;
 
     protected ArticleTag() {}

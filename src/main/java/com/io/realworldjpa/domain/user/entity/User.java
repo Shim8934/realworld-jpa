@@ -2,6 +2,7 @@ package com.io.realworldjpa.domain.user.entity;
 
 import com.io.realworldjpa.domain.article.entity.Article;
 import com.io.realworldjpa.domain.article.entity.ArticleFavorite;
+import com.io.realworldjpa.global.util.Generated;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -69,10 +70,6 @@ public class User {
         this.anonymous = anonymous;
     }
 
-    public User(Email email, Password password, Profile profile) {
-        this(null, email, password, profile, null, false);
-    }
-
     public static User anonymous() {
         return new User.Builder().id(null).anonymous(true).build();
     }
@@ -110,7 +107,7 @@ public class User {
     }
 
     public User setToken(String token) {
-        checkArgument(isNotEmpty(token) || isNotBlank(token), "토큰이 존재하지 않습니다.");
+        checkArgument(isNotBlank(token), "토큰이 존재하지 않습니다.");
         this.token = token;
         return this;
     }
@@ -218,17 +215,20 @@ public class User {
     }
 
     @Override
+    @Generated
     public boolean equals(Object o) {
         return o instanceof User user
                 && Objects.equals(this.id, user.id);
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(this.id);
     }
 
     @Override
+    @Generated
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("id", id)

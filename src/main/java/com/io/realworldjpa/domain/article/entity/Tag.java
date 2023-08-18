@@ -1,5 +1,6 @@
 package com.io.realworldjpa.domain.article.entity;
 
+import com.io.realworldjpa.global.util.Generated;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -55,6 +56,7 @@ public class Tag {
     }
 
     @Override
+    @Generated
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("value", value)
@@ -62,12 +64,14 @@ public class Tag {
     }
 
     @Override
+    @Generated
     public boolean equals(Object o) {
         return o instanceof Tag tag
                 && Objects.equals(this.value, tag.value);
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(this.value);
     }

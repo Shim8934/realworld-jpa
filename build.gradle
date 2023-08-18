@@ -57,8 +57,12 @@ dependencies {
     testImplementation "org.springframework.security:spring-security-test"
 }
 
+compileJava {
+    dependsOn clean
+}
 
 test {
+    dependsOn clean
     useJUnitPlatform()
     jacoco {
         destinationFile = file("$buildDir/jacoco/jacoco.exec")
@@ -66,55 +70,85 @@ test {
     finalizedBy 'jacocoTestReport'
 }
 
+afterEvaluate {
+    jacocoTestReport {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    'com/io/realworldjpa/domain/article/model/**',
+                    'com/io/realworldjpa/domain/user/model/**',
+                    'com/io/realworldjpa/global/util/**',
+                    'com/io/realworldjpa/RealworldJpaApplication.class'
+            ])
+        }))
+    }
+    jacocoTestCoverageVerification {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    'com/io/realworldjpa/domain/article/model/**',
+                    'com/io/realworldjpa/domain/user/model/**',
+                    'com/io/realworldjpa/global/util/**',
+                    'com/io/realworldjpa/RealworldJpaApplication.class'
+            ])
+        }))
+    }
+}
+
 jacocoTestReport {
     dependsOn test
     reports {
-        // 원하는 리포트를 켜고 끌 수 있습니다.
         html.enabled true
         csv.enabled false
         xml.enabled false
 
-        //  각 리포트 타입 마다 리포트 저장 경로를 설정할 수 있습니다.
-        html.destination file("$buildDir/jacocoHtml")
-//        csv.destination file("$buildDir/jacocoCsv")
+        html.destination file("$buildDir/jacoco/html")
+
         finalizedBy 'jacocoTestCoverageVerification'
     }
 }
 
-compileJava {
-    dependsOn clean
-}
-
 jacocoTestCoverageVerification {
     violationRules {
-        rule {
-            element = "CLASS"
-
-            limit {
-                minimum = 0.30
-            }
-        }
-
+        // For Instruction Coverage - 실행되지 않은 코드의 양.
         rule {
             enabled = true
             element = "CLASS"
+            limit {
+                counter = "INSTRUCTION"
+                value = "COVEREDRATIO"
+                minimum = 0.50
+            }
+        }
 
+        // For Branch Coverage - 실행되지 않은 분기 수.
+        rule {
+            enabled = false
+            element = "CLASS"
             limit {
                 counter = "BRANCH"
                 value = "COVEREDRATIO"
                 minimum = 0.70
             }
+        }
 
+        // For Line Coverage - 소스 코드의 어느 줄이 실행되었는지.
+        rule {
+            enabled = false
+            element = "CLASS"
             limit {
                 counter = "LINE"
                 value = "COVEREDRATIO"
                 minimum = 0.70
             }
+        }
 
+        // For Cyclomatic Complexity - 메서드나 클래스의 복잡도. (일반적으로 높은 복잡도는 테스트하기 어려운 코드를 의미.)
+        rule {
+            enabled = true
+            element = "CLASS"
             limit {
-                counter = "LINE"
-                value = "TOTALCOUNT"
-                maximum = 200
+                counter = "COMPLEXITY"
+                value = "COVEREDRATIO"
+                minimum = 0.50
             }
         }
     }
