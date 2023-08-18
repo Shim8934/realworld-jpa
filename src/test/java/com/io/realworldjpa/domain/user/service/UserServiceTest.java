@@ -52,8 +52,8 @@ class UserServiceTest {
         // then
         assertThat(testUser.email()).isEqualTo("testEmail10@example.com");
         assertThat(testUser.username()).isEqualTo("testUsername10");
-        assertThat(testUser.bio()).isNull();
-        assertThat(testUser.image()).isNull();
+        assertThat(testUser.bio()).isBlank();
+        assertThat(testUser.image()).isBlank();
     }
 
     @Test

@@ -44,7 +44,7 @@ class UserRestControllerTest {
         // when
         ResultActions resultActions = mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userPostRequest)));
+                .content(objectMapper.writeValueAsString(Map.of("user",userPostRequest))));
 
         // then
         resultActions
@@ -60,7 +60,7 @@ class UserRestControllerTest {
     void post_user_with_invalid_request_expect_badRequest_status(UserPostRequest userPostRequest) throws Exception {
         mockMvc.perform(post("/api/users")
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(userPostRequest)))
+                        .content(objectMapper.writeValueAsBytes(Map.of("user",userPostRequest))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -78,7 +78,7 @@ class UserRestControllerTest {
         ResultActions resultActions = mockMvc.perform(
                 post("/api/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(loginRequest))
+                        .content(objectMapper.writeValueAsBytes(Map.of("user",loginRequest)))
         );
 
         resultActions
@@ -131,7 +131,7 @@ class UserRestControllerTest {
         UserPutRequest userPutRequest = new UserPutRequest("testEmail@example.com", "testUsername10", "testPassword", "testBio", "testImage.url");
         ResultActions resultActions = mockMvc.perform(put("/api/user").header("Authorization", "Token " + testToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userPutRequest)));
+                .content(objectMapper.writeValueAsString(Map.of("user",userPutRequest))));
 
 
         // then
@@ -160,7 +160,7 @@ class UserRestControllerTest {
         UserPutRequest userPutRequest = new UserPutRequest("testEmail10@example.com", "testUsername10", "testPassword", "testBio", "testImage.url");
         ResultActions resultActions = mockMvc.perform(put("/api/user").header("Authorization", "Token " + testToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userPutRequest)));
+                .content(objectMapper.writeValueAsString(Map.of("user",userPutRequest))));
 
         // then
         resultActions
