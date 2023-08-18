@@ -18,7 +18,6 @@ public class ObjectMapperConfiguration {
     public ObjectMapper objectMapper(Jackson2ObjectMapperBuilder builder) {
         return builder.modules(iso8601SerializeModule())
                 .featuresToEnable(DeserializationFeature.UNWRAP_ROOT_VALUE)
-                .featuresToEnable(SerializationFeature.WRAP_ROOT_VALUE)
                 .featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                 .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
