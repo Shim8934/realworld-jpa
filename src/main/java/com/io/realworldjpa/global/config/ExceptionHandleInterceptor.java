@@ -1,5 +1,6 @@
 package com.io.realworldjpa.global.config;
 
+import com.io.realworldjpa.global.util.Generated;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -12,6 +13,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.NoSuchElementException;
 
 @Slf4j
+@Generated
 @RestControllerAdvice
 public class ExceptionHandleInterceptor extends ResponseEntityExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)

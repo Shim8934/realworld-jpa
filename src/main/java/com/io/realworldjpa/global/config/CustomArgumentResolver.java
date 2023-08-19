@@ -2,6 +2,7 @@ package com.io.realworldjpa.global.config;
 
 import com.io.realworldjpa.domain.user.entity.User;
 import com.io.realworldjpa.domain.user.service.UserRepository;
+import com.io.realworldjpa.global.util.Generated;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -20,6 +21,7 @@ public class CustomArgumentResolver implements HandlerMethodArgumentResolver {
     private final UserRepository userRepository;
 
     @Override
+    @Generated
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.getParameterType() == User.class;
     }

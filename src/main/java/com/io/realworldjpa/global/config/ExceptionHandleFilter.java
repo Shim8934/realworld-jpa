@@ -1,5 +1,6 @@
 package com.io.realworldjpa.global.config;
 
+import com.io.realworldjpa.global.util.Generated;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,6 +11,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Slf4j
 @Component
+@Generated
 @RequiredArgsConstructor
 public class ExceptionHandleFilter extends OncePerRequestFilter {
     private final ExceptionHandleInterceptor delegator;

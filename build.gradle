@@ -115,7 +115,7 @@ jacocoTestCoverageVerification {
             limit {
                 counter = "INSTRUCTION"
                 value = "COVEREDRATIO"
-                minimum = 0.50
+                minimum = 0.70
             }
         }
 
@@ -126,13 +126,13 @@ jacocoTestCoverageVerification {
             limit {
                 counter = "BRANCH"
                 value = "COVEREDRATIO"
-                minimum = 0.70
+                minimum = 0.50
             }
         }
 
         // For Line Coverage - 소스 코드의 어느 줄이 실행되었는지.
         rule {
-            enabled = false
+            enabled = true
             element = "CLASS"
             limit {
                 counter = "LINE"
@@ -148,7 +148,7 @@ jacocoTestCoverageVerification {
             limit {
                 counter = "COMPLEXITY"
                 value = "COVEREDRATIO"
-                minimum = 0.50
+                minimum = 0.75
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.io.realworldjpa.domain.user.entity;
 
+import com.io.realworldjpa.global.util.Generated;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -53,6 +54,7 @@ public class Follow implements Serializable {
     }
 
     @Override
+    @Generated
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("id", id)
@@ -62,6 +64,7 @@ public class Follow implements Serializable {
     }
 
     @Override
+    @Generated
     public boolean equals(Object o) {
         return o instanceof Follow follow
                 && Objects.equals(this.from, follow.from)
@@ -69,6 +72,7 @@ public class Follow implements Serializable {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(this.id, this.from, this.to);
     }

@@ -53,7 +53,7 @@ public class UserService {
 
     @Transactional
     public UserDto updateUser(User updateUser, UserPutRequest putRequest) {
-        checkArgument(isNotEmpty(putRequest.email()) || isNotBlank(putRequest.email()), "email must not be null or blank!");
+        checkArgument(isNotEmpty(putRequest.email()), "email must not be null or blank!");
         checkArgument(isNotEmpty(putRequest.password()), "password must be provided.");
 
         Email putEmail = new Email(putRequest.email());

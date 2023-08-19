@@ -1,5 +1,6 @@
 package com.io.realworldjpa.global.security;
 
+import com.io.realworldjpa.global.util.Generated;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
+@Generated
 public class CustomPrefixBearerTokenResolver implements BearerTokenResolver {
     private static final Pattern AUTHORIZATION_PATTERN = Pattern.compile("^Token (?<token>[a-zA-Z0-9-._~+/]+=*)$", Pattern.CASE_INSENSITIVE);
 

@@ -1,6 +1,7 @@
 package com.io.realworldjpa.domain.article.entity;
 
 import com.io.realworldjpa.domain.user.entity.User;
+import com.io.realworldjpa.global.util.Generated;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -54,6 +55,7 @@ public class ArticleFavorite {
     }
 
     @Override
+    @Generated
     public boolean equals(Object o) {
         return o instanceof ArticleFavorite favorite
                 && Objects.equals(this.user, favorite.user)
@@ -61,6 +63,7 @@ public class ArticleFavorite {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(this.id, this.user, this.article);
     }

@@ -1,5 +1,6 @@
 package com.io.realworldjpa.domain.article.entity;
 
+import com.io.realworldjpa.global.util.Generated;
 import jakarta.persistence.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -44,6 +45,7 @@ public class ArticleTag {
     }
 
     @Override
+    @Generated
     public boolean equals(Object o) {
         return o instanceof ArticleTag articleTag
                 && Objects.equals(this.article, articleTag.article)
@@ -51,6 +53,7 @@ public class ArticleTag {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(this.id, this.article, this.tag);
     }

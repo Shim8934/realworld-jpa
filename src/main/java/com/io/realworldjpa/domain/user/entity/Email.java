@@ -1,5 +1,6 @@
 package com.io.realworldjpa.domain.user.entity;
 
+import com.io.realworldjpa.global.util.Generated;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -36,6 +37,7 @@ public class Email {
     return matches("[\\w~\\-.+]+@[\\w~\\-]+(\\.[\\w~\\-]+)+", address);
   }
 
+  @Generated
   public String getName() {
     String[] tokens = address.split("@");
     if (tokens.length == 2)
@@ -43,6 +45,7 @@ public class Email {
     return null;
   }
 
+  @Generated
   public String getDomain() {
     String[] tokens = address.split("@");
     if (tokens.length == 2)
@@ -55,6 +58,7 @@ public class Email {
   }
 
   @Override
+  @Generated
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
@@ -63,11 +67,13 @@ public class Email {
   }
 
   @Override
+  @Generated
   public int hashCode() {
     return Objects.hash(address);
   }
 
   @Override
+  @Generated
   public String toString() {
     return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
       .append("address", address)
