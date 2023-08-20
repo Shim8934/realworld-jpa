@@ -1,6 +1,7 @@
 package com.io.realworldjpa.domain.article.entity;
 
 import com.io.realworldjpa.domain.user.entity.User;
+import com.io.realworldjpa.global.util.Generated;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -101,6 +102,7 @@ public class Article {
         return this.getTags().stream().map(Tag::getValue).sorted().toArray(String[]::new);
     }
 
+    @Generated
     public boolean equalsArticle(ArticleFavorite articleFavorite) {
         return articleFavorite.getArticle().equals(this);
     }
@@ -137,21 +139,45 @@ public class Article {
         return createdAt;
     }
 
-    public int numberOfLikes() {
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public int numberOfFavorites() {
         return this.favoriteUsers.size();
     }
 
+    public boolean isNotWrittenByMe(User writer) {
+        return !this.author.equals(writer);
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
+        this.slug = createSlugByTitle(title);
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
     @Override
+    @Generated
     public boolean equals(Object o) {
         return o instanceof Article article
                 && Objects.equals(this.id, article.id);
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(this.id);
     }
 
+    @Generated
     static public class Builder {
         private Long id;
         private User author;

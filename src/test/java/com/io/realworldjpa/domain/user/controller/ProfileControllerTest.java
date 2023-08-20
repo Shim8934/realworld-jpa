@@ -1,6 +1,5 @@
 package com.io.realworldjpa.domain.user.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.realworldjpa.IntegrationTest;
 import com.io.realworldjpa.domain.user.model.LoginRequest;
 import com.io.realworldjpa.domain.user.model.UserPostRequest;
@@ -16,7 +15,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @IntegrationTest
 @DisplayName("ProfileAPI Test")
@@ -24,8 +22,6 @@ class ProfileControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
     @Autowired
     private UserService userService;
 

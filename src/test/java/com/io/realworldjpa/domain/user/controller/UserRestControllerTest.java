@@ -54,6 +54,7 @@ class UserRestControllerTest {
                 .andExpect(model().attribute("user", Map.of("user", new LoginRequest("testEmail10@example.com", "testPassword"))))
                 .andDo(print());
     }
+
     @ParameterizedTest
     @MethodSource("invalidPostRequest")
     @DisplayName("POST /api/users/login - Invalid Request")

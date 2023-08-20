@@ -11,15 +11,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Entity
 @Table(name = "users")
@@ -102,6 +98,8 @@ public class User {
         return follower;
     }
 
+
+
     public boolean matchesPassword(String rawPassword, PasswordEncoder passwordEncoder) {
         return password.matchesPassword(rawPassword, passwordEncoder);
     }
@@ -137,12 +135,8 @@ public class User {
     }
 
     public void followUser(User targetUser) {
-        if (targetUser == null || targetUser.isAnonymous()) {
-            throw new IllegalArgumentException("팔로우 대상이 존재하지 않습니다.");
-        }
-
         if (isAlreadyFollow(targetUser)) {
-            return ;
+            throw new IllegalArgumentException("이미 팔로우한 유저입니다.");
         }
 
         Follow follow = new Follow(this, targetUser);
@@ -156,9 +150,6 @@ public class User {
     }
 
     public void unfollowUser(User to) {
-        if (to == null || to.isAnonymous()) {
-            throw new IllegalArgumentException("팔로우 대상이 존재하지 않습니다.");
-        }
         Optional<Follow> currentFollow = this.following.stream().filter(to::isFollowing).findFirst();
         currentFollow.ifPresent(follow -> {
             this.following.remove(follow);
@@ -176,7 +167,7 @@ public class User {
         }
 
         if (isAlreadyFavorite(article)) {
-            return ;
+            throw new IllegalArgumentException("이미 팔로우한 게시글입니다.");
         }
 
         ArticleFavorite articleFavorite = new ArticleFavorite(this, article);
@@ -214,6 +205,10 @@ public class User {
         return this.favoriteArticles.stream().filter(article::equalsArticle).findFirst();
     }
 
+    public List<User> followUserList() {
+        return this.following.stream().map(Follow::getTo).toList();
+    }
+
     @Override
     @Generated
     public boolean equals(Object o) {
@@ -238,6 +233,7 @@ public class User {
                 .toString();
     }
 
+    @Generated
     static public class Builder {
         private Long id;
         private Email email;

@@ -1,17 +1,17 @@
 package com.io.realworldjpa.domain.article.entity;
 
 import com.io.realworldjpa.IntegrationTest;
-import com.io.realworldjpa.domain.user.entity.Email;
-import com.io.realworldjpa.domain.user.entity.Password;
-import com.io.realworldjpa.domain.user.entity.Profile;
-import com.io.realworldjpa.domain.user.entity.User;
+import com.io.realworldjpa.domain.user.entity.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.NoSuchElementException;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @IntegrationTest
 @DisplayName("Article Entity Test")
@@ -39,7 +39,7 @@ class ArticleTest {
     }
 
     @Test
-    @DisplayName("Add Tag To Article & Get Tag")
+    @DisplayName("Add_Tag_To_Article & Get_Tag")
     void addTagForArticle() {
         // given
         Tag tag = new Tag("JPA");
@@ -52,7 +52,7 @@ class ArticleTest {
     }
 
     @Test
-    @DisplayName("Add TagList to Article & Get TagList")
+    @DisplayName("Add_TagList_to_Article & Get_TagList")
     void tagList() {
         // given
         Tag java = new Tag("JAVA");
@@ -69,8 +69,8 @@ class ArticleTest {
     }
 
     @Test
-    @DisplayName("Favorite Article.")
-    void favorite() {
+    @DisplayName("Favorite_Article")
+    void Favorite_Article() {
         User shimki = new User.Builder()
                 .email(new Email("shimki@example.com"))
                 .profile(Profile.of("shimki", "shimki's bio", "shimki.jpg"))
@@ -82,12 +82,46 @@ class ArticleTest {
 
         // then
         assertThat(shimki.isAlreadyFavorite(article)).isTrue();
-        assertThat(article.numberOfLikes()).isOne();
+        assertThat(article.numberOfFavorites()).isOne();
+        assertThat(article.getFavoriteUsers().stream().map(ArticleFavorite::getUser)).contains(shimki);
     }
 
     @Test
-    @DisplayName("Unfavorite Article.")
-    void unfavorite() {
+    @DisplayName("Favorite_Article_Repeat_Expect_Error")
+    void Favorite_Repeat_Expect_Error() {
+        User shimki = new User.Builder()
+                .email(new Email("shimki@example.com"))
+                .profile(Profile.of("shimki", "shimki's bio", "shimki.jpg"))
+                .password(Password.of("testPassword", passwordEncoder))
+                .build();
+
+        // when
+        shimki.favoriteArticle(article);
+        assertThatThrownBy(() -> shimki.favoriteArticle(article))
+
+                // then
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("Favorite_Not_Exist_Article_Expect_Error")
+    void favorite_Not_Exist_Article_Expect_Error() {
+        User shimki = new User.Builder()
+                .email(new Email("shimki@example.com"))
+                .profile(Profile.of("shimki", "shimki's bio", "shimki.jpg"))
+                .password(Password.of("testPassword", passwordEncoder))
+                .build();
+
+        // when
+        assertThatThrownBy(() -> shimki.favoriteArticle(null))
+
+        // then
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("Unfavorite_Article")
+    void Unfavorite_Article() {
         User shimki = new User.Builder()
                 .email(new Email("shimki@example.com"))
                 .profile(Profile.of("shimki", "shimki's bio", "shimki.jpg"))
@@ -99,6 +133,22 @@ class ArticleTest {
 
         // then
         assertThat(shimki.isAlreadyFavorite(article)).isFalse();
-        assertThat(article.numberOfLikes()).isZero();
+        assertThat(article.numberOfFavorites()).isZero();
+    }
+
+    @Test
+    @DisplayName("Unfavorite_Not_Exist_Article_Expect_Error")
+    void Unfavorite_Not_Exist_Article_Expect_Error() {
+        User shimki = new User.Builder()
+                .email(new Email("shimki@example.com"))
+                .profile(Profile.of("shimki", "shimki's bio", "shimki.jpg"))
+                .password(Password.of("testPassword", passwordEncoder))
+                .build();
+
+        // when
+        assertThatThrownBy(() -> shimki.unfavoriteArticle(null))
+
+                // then
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

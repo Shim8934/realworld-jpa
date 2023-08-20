@@ -21,7 +21,7 @@ public class Email {
   public Email(String address) {
     checkArgument(isNotEmpty(address), "address must be provided.");
     checkArgument(
-      address.length() >= 4 && address.length() <= 50,
+      address.length() >= 10 && address.length() <= 50,
       "address length must be between 4 and 50 characters."
     );
     checkArgument(checkAddress(address), "Invalid email address: " + address);
@@ -29,28 +29,18 @@ public class Email {
     this.address = address;
   }
 
-  protected Email() {
-
-  }
+  protected Email() {}
 
   private static boolean checkAddress(String address) {
     return matches("[\\w~\\-.+]+@[\\w~\\-]+(\\.[\\w~\\-]+)+", address);
   }
 
-  @Generated
   public String getName() {
-    String[] tokens = address.split("@");
-    if (tokens.length == 2)
-      return tokens[0];
-    return null;
+    return address.split("@")[0];
   }
 
-  @Generated
   public String getDomain() {
-    String[] tokens = address.split("@");
-    if (tokens.length == 2)
-      return tokens[1];
-    return null;
+    return address.split("@")[1];
   }
 
   public String getAddress() {
@@ -60,10 +50,8 @@ public class Email {
   @Override
   @Generated
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    Email email = (Email) o;
-    return Objects.equals(address, email.address);
+    return o instanceof Email email
+            && Objects.equals(address, email.address);
   }
 
   @Override
