@@ -34,8 +34,6 @@ class ArticleServiceTest {
     @Autowired
     private ArticleRepository articleRepository;
     @Autowired
-    private TagRepository tagRepository;
-    @Autowired
     private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;

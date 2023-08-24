@@ -1,14 +1,15 @@
 package com.io.realworldjpa.domain.article.entity;
 
 import com.io.realworldjpa.IntegrationTest;
-import com.io.realworldjpa.domain.user.entity.*;
+import com.io.realworldjpa.domain.user.entity.Email;
+import com.io.realworldjpa.domain.user.entity.Password;
+import com.io.realworldjpa.domain.user.entity.Profile;
+import com.io.realworldjpa.domain.user.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -100,7 +101,7 @@ class ArticleTest {
         assertThatThrownBy(() -> shimki.favoriteArticle(article))
 
                 // then
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class).hasMessage("이미 팔로우한 게시글입니다.");
     }
 
     @Test
@@ -116,7 +117,7 @@ class ArticleTest {
         assertThatThrownBy(() -> shimki.favoriteArticle(null))
 
         // then
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class).hasMessage("게시글이 존재하지 않습니다.");
     }
 
     @Test
@@ -149,6 +150,6 @@ class ArticleTest {
         assertThatThrownBy(() -> shimki.unfavoriteArticle(null))
 
                 // then
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class).hasMessage("게시글이 존재하지 않습니다.");
     }
 }
