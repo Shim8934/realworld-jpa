@@ -34,7 +34,7 @@ class ArticleTest {
         article = new Article.Builder()
                 .title("test Article title")
                 .author(shimki)
-                .content("test Content for Essential Body")
+                .body("test Content for Essential Body")
                 .description("test Description")
                 .build();
     }

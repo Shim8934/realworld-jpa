@@ -198,7 +198,6 @@ public class User {
                     articleFavorite.getArticle().getFavoriteUsers().remove(articleFavorite);
                 }
         );
-
     }
 
     private Optional<ArticleFavorite> findFavoriteArticle(Article article) {

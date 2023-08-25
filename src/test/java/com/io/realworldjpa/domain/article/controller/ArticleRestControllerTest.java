@@ -3,9 +3,11 @@ package com.io.realworldjpa.domain.article.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.realworldjpa.IntegrationTest;
 import com.io.realworldjpa.domain.article.entity.Article;
+import com.io.realworldjpa.domain.article.entity.Comment;
 import com.io.realworldjpa.domain.article.entity.Tag;
 import com.io.realworldjpa.domain.article.model.ArticlePostRequest;
 import com.io.realworldjpa.domain.article.model.ArticlePutRequest;
+import com.io.realworldjpa.domain.article.model.CommentPostRequest;
 import com.io.realworldjpa.domain.article.service.ArticleRepository;
 import com.io.realworldjpa.domain.article.service.ArticleService;
 import com.io.realworldjpa.domain.user.entity.Email;
@@ -15,12 +17,14 @@ import com.io.realworldjpa.domain.user.entity.User;
 import com.io.realworldjpa.domain.user.model.LoginRequest;
 import com.io.realworldjpa.domain.user.service.UserRepository;
 import com.io.realworldjpa.domain.user.service.UserService;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -54,22 +58,24 @@ class ArticleRestControllerTest {
     private User shimki;
     private String shimkiToken;
     private User bangki;
-    private User tanki;
+    private String bangkiToken;
+    private User tangki;
+    private String tangkiToken;
     private String testSlug;
 
     @BeforeEach
     void setupUsers() throws Exception {
         shimki = createTestUsers("shimki");
         bangki = createTestUsers("bangki");
-        tanki = createTestUsers("tanki");
+        tangki = createTestUsers("tangki");
 
         userRepository.save(shimki);
         userRepository.save(bangki);
-        userRepository.save(tanki);
+        userRepository.save(tangki);
 
-        tanki.followUser(shimki);
-        tanki.followUser(bangki);
-        shimki.followUser(tanki);
+        tangki.followUser(shimki);
+        tangki.followUser(bangki);
+        shimki.followUser(tangki);
 
         for (int i = 0; i < 15; i++) {
             if (i < 7) {
@@ -79,7 +85,7 @@ class ArticleRestControllerTest {
                 createTestArticle(bangki, i);
             }
             else {
-                createTestArticle(tanki, i);
+                createTestArticle(tangki, i);
             }
         }
 
@@ -87,6 +93,12 @@ class ArticleRestControllerTest {
 
         LoginRequest testLogin = new LoginRequest("shimki@example.com", "testPassword");
         shimkiToken = "Token " + userService.login(testLogin).token();
+
+        LoginRequest testLogin1 = new LoginRequest("bangki@example.com", "testPassword");
+        bangkiToken = "Token " + userService.login(testLogin1).token();
+
+        LoginRequest testLogin2 = new LoginRequest("tangki@example.com", "testPassword");
+        tangkiToken = "Token " + userService.login(testLogin2).token();
     }
 
     @Test
@@ -120,7 +132,7 @@ class ArticleRestControllerTest {
                 .andExpect(jsonPath("$.articles[0].slug").value("how-to-train-your-dragon-14"))
                 .andExpect(jsonPath("$.articles[0].body").value("Ever wonder how? 14"))
                 .andExpect(jsonPath("$.articles[0].description").value("Very carefully. 14"))
-                .andExpect(jsonPath("$.articles[0].author.username").value("tanki"))
+                .andExpect(jsonPath("$.articles[0].author.username").value("tangki"))
                 .andExpect(jsonPath("$.articles[0].favorited").value(false))
                 .andDo(print());
     }
@@ -139,7 +151,7 @@ class ArticleRestControllerTest {
                 .andExpect(jsonPath("$.articles[0].slug").value("how-to-train-your-dragon-14"))
                 .andExpect(jsonPath("$.articles[0].body").value("Ever wonder how? 14"))
                 .andExpect(jsonPath("$.articles[0].description").value("Very carefully. 14"))
-                .andExpect(jsonPath("$.articles[0].author.username").value("tanki"))
+                .andExpect(jsonPath("$.articles[0].author.username").value("tangki"))
                 .andExpect(jsonPath("$.articles[0].favorited").value(true))
                 .andDo(print());
     }
@@ -158,7 +170,7 @@ class ArticleRestControllerTest {
                 .andExpect(jsonPath("$.articles[0].slug").value("how-to-train-your-dragon-14"))
                 .andExpect(jsonPath("$.articles[0].body").value("Ever wonder how? 14"))
                 .andExpect(jsonPath("$.articles[0].description").value("Very carefully. 14"))
-                .andExpect(jsonPath("$.articles[0].author.username").value("tanki"))
+                .andExpect(jsonPath("$.articles[0].author.username").value("tangki"))
                 .andExpect(jsonPath("$.articles[0].favorited").value(true))
                 .andDo(print());
     }
@@ -283,6 +295,192 @@ class ArticleRestControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    @DisplayName("POST /api/articles/{slug}/comments")
+    void Post_Comment() throws Exception {
+        //given
+        CommentPostRequest testPostRequest = new CommentPostRequest("Test Comment");
+
+        // when
+        ResultActions resultActions = mockMvc.perform(post("/api/articles/{slug}/comments", testSlug)
+                .header("Authorization", bangkiToken)
+                .content(objectMapper.writeValueAsString(Map.of("comment", testPostRequest)))
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.comment.body").value("Test Comment"))
+                .andExpect(jsonPath("$.comment.author.username").value("bangki"))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("POST /api/articles/{slug}/comments - Without Token")
+    void Post_Comment_Without_Token_Expect_UnAuthorized() throws Exception {
+        //given
+        CommentPostRequest testPostRequest = new CommentPostRequest("Test Comment");
+
+        // when
+        ResultActions resultActions = mockMvc.perform(post("/api/articles/{slug}/comments", testSlug)
+                .content(objectMapper.writeValueAsString(Map.of("comment", testPostRequest)))
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("GET /api/articles/{slug}/comments - Without Token")
+    void Get_Comments_Without_Token() throws Exception {
+        //given
+        CommentPostRequest testPostRequest = new CommentPostRequest("Test Comment");
+
+        // when
+        mockMvc.perform(post("/api/articles/{slug}/comments", testSlug)
+                .header("Authorization", bangkiToken)
+                .content(objectMapper.writeValueAsString(Map.of("comment", testPostRequest)))
+                .contentType(MediaType.APPLICATION_JSON));
+
+        ResultActions resultActions = mockMvc.perform(get("/api/articles/{slug}/comments", testSlug)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.comments[0].body").value("Test Comment"))
+                .andExpect(jsonPath("$.comments[0].author.username").value("bangki"))
+                .andExpect(jsonPath("$.comments[0].author.following").value(false))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("GET /api/articles/{slug}/comments - With Follow User")
+    void Get_Comments_With_Follow_User() throws Exception {
+        //given
+        CommentPostRequest testPostRequest = new CommentPostRequest("Test Comment");
+
+        // when
+        mockMvc.perform(post("/api/articles/{slug}/comments", testSlug)
+                .header("Authorization", bangkiToken)
+                .content(objectMapper.writeValueAsString(Map.of("comment", testPostRequest)))
+                .contentType(MediaType.APPLICATION_JSON));
+
+        ResultActions resultActions = mockMvc.perform(get("/api/articles/{slug}/comments", testSlug)
+                .header("Authorization", tangkiToken)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.comments[0].body").value("Test Comment"))
+                .andExpect(jsonPath("$.comments[0].author.username").value("bangki"))
+                .andExpect(jsonPath("$.comments[0].author.following").value(true))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("GET /api/articles/{slug}/comments - With UnFollow User")
+    void Get_Comments_With_UnFollow_User() throws Exception {
+        //given
+        CommentPostRequest testPostRequest = new CommentPostRequest("Test Comment");
+
+        // when
+        mockMvc.perform(post("/api/articles/{slug}/comments", testSlug)
+                .header("Authorization", bangkiToken)
+                .content(objectMapper.writeValueAsString(Map.of("comment", testPostRequest)))
+                .contentType(MediaType.APPLICATION_JSON));
+
+        ResultActions resultActions = mockMvc.perform(get("/api/articles/{slug}/comments", testSlug)
+                .header("Authorization", shimkiToken)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.comments[0].body").value("Test Comment"))
+                .andExpect(jsonPath("$.comments[0].author.username").value("bangki"))
+                .andExpect(jsonPath("$.comments[0].author.following").value(false))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/articles/{slug}/comments/{id}")
+    void Delete_Comment() throws Exception {
+        //given
+        CommentPostRequest testPostRequest = new CommentPostRequest("Test Comment");
+
+        long commentId = JsonPath.parse(mockMvc.perform(post("/api/articles/{slug}/comments", testSlug)
+                                                .header("Authorization", shimkiToken)
+                                                .content(objectMapper.writeValueAsString(Map.of("comment", testPostRequest)))
+                                                .contentType(MediaType.APPLICATION_JSON))
+                                                .andReturn()
+                                                .getResponse()
+                                                .getContentAsString())
+                                .read("$.comment.id", Long.class);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(delete("/api/articles/{slug}/comments/{id}", testSlug, commentId)
+                .header("Authorization", shimkiToken)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/articles/{slug}/comments/{id} - Without Token")
+    void Delete_Comment_Without_Token_Expect_UnAuthorized() throws Exception {
+        //given
+        CommentPostRequest testPostRequest = new CommentPostRequest("Test Comment");
+
+        long commentId = JsonPath.parse(mockMvc.perform(post("/api/articles/{slug}/comments", testSlug)
+                                .header("Authorization", shimkiToken)
+                                .content(objectMapper.writeValueAsString(Map.of("comment", testPostRequest)))
+                                .contentType(MediaType.APPLICATION_JSON))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString())
+                .read("$.comment.id", Long.class);
+        // when
+        ResultActions resultActions = mockMvc.perform(delete("/api/articles/{slug}/comments/{id}", testSlug, commentId)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/articles/{slug}/comments/{id} - Not Writer Expect Error")
+    void Delete_Comment_Not_Writer_Expect_Error() throws Exception {
+        //given
+        CommentPostRequest testPostRequest = new CommentPostRequest("Test Comment");
+
+        long commentId = JsonPath.parse(mockMvc.perform(post("/api/articles/{slug}/comments", testSlug)
+                                .header("Authorization", shimkiToken)
+                                .content(objectMapper.writeValueAsString(Map.of("comment", testPostRequest)))
+                                .contentType(MediaType.APPLICATION_JSON))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString())
+                .read("$.comment.id", Long.class);
+        // when
+        ResultActions resultActions = mockMvc.perform(delete("/api/articles/{slug}/comments/{id}", testSlug, commentId)
+                .header("Authorization", bangkiToken)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+
     private User createTestUsers(String testName) {
         return new User.Builder()
                 .email(new Email(testName + "@example.com"))
@@ -297,7 +495,7 @@ class ArticleRestControllerTest {
             testArticle = new Article.Builder()
                     .title("How to train your dragon")
                     .description("Very carefully.")
-                    .content("Ever wonder how?")
+                    .body("Ever wonder how?")
                     .author(author)
                     .build();
             Tag tag1 = new Tag("training");
@@ -311,7 +509,7 @@ class ArticleRestControllerTest {
             testArticle = new Article.Builder()
                     .title("%s %d".formatted("How to train your dragon", i))
                     .description("%s %d".formatted("Very carefully.", i))
-                    .content("%s %d".formatted("Ever wonder how?", i))
+                    .body("%s %d".formatted("Ever wonder how?", i))
                     .author(author)
                     .build();
             if (i > 7) {
@@ -321,5 +519,4 @@ class ArticleRestControllerTest {
 
         articleRepository.save(testArticle);
     }
-
 }

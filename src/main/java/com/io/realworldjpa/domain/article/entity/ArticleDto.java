@@ -16,7 +16,7 @@ public record ArticleDto(
     public ArticleDto(User user, Article article) {
         this(
                 article.getSlug(), article.getTitle(), article.getDescription(),
-                article.getContent(), article.getTagsValues(),
+                article.getBody(), article.getTagsValues(),
                 article.getCreatedAt(), article.getUpdatedAt(),
                 user.isAlreadyFavorite(article), article.numberOfFavorites(),
                 new ProfileDto(user, article.getAuthor())

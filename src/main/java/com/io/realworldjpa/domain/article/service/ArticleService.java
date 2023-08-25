@@ -1,12 +1,12 @@
 package com.io.realworldjpa.domain.article.service;
 
-import com.io.realworldjpa.domain.article.entity.Article;
-import com.io.realworldjpa.domain.article.entity.ArticleDto;
-import com.io.realworldjpa.domain.article.entity.Tag;
+import com.io.realworldjpa.domain.article.entity.*;
 import com.io.realworldjpa.domain.article.model.ArticlePostRequest;
 import com.io.realworldjpa.domain.article.model.ArticlePutRequest;
+import com.io.realworldjpa.domain.article.model.CommentPostRequest;
 import com.io.realworldjpa.domain.article.model.MultipleArticleRequest;
 import com.io.realworldjpa.domain.user.entity.User;
+import com.io.realworldjpa.domain.user.service.FollowRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
+
+import static com.io.realworldjpa.domain.article.entity.CommentDto.*;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +25,8 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
     private final TagRepository tagRepository;
+    private final CommentRepository commentRepository;
+    private final FollowRepository followRepository;
 
     @Transactional(readOnly = true)
     public ArticleDto getArticle(User reader, String slug) {
@@ -61,7 +66,7 @@ public class ArticleService {
         Article article = new Article.Builder()
                 .title(articlePostRequest.title())
                 .description(articlePostRequest.description())
-                .content(articlePostRequest.body())
+                .body(articlePostRequest.body())
                 .author(author)
                 .build();
 
@@ -80,13 +85,13 @@ public class ArticleService {
         Article article = articleRepository.findBySlug(slug)
                 .orElseThrow(() -> new NoSuchElementException("게시글 ['%s'] 이 존재하지 않습니다.".formatted(slug)));
 
-        if (article.isNotWrittenByMe(editor)) {
+        if (article.isNotPostByMe(editor)) {
             throw new IllegalArgumentException("수정 권한이 없습니다.");
         }
 
         article.updateTitle(articlePutRequest.title());
         article.updateDescription(articlePutRequest.description());
-        article.updateContent(articlePutRequest.body());
+        article.updateBody(articlePutRequest.body());
 
         return new ArticleDto(editor, article);
     }
@@ -96,10 +101,60 @@ public class ArticleService {
         Article article = articleRepository.findBySlug(slug)
                 .orElseThrow(() -> new NoSuchElementException("게시글 ['%s'] 이 존재하지 않습니다.".formatted(slug)));
 
-        if (article.isNotWrittenByMe(author)) {
+        if (article.isNotPostByMe(author)) {
             throw new IllegalArgumentException("삭제 권한이 없습니다.");
         }
 
         articleRepository.delete(article);
+    }
+
+    @Transactional
+    public CommentDto createComment(User author, String slug, CommentPostRequest commentPostRequest) {
+        Article article = articleRepository.findBySlug(slug)
+                .orElseThrow(() -> new NoSuchElementException("게시글 ['%s'] 이 존재하지 않습니다.".formatted(slug)));
+
+        Comment comment = new Comment.Builder()
+                .article(article)
+                .author(author)
+                .body(commentPostRequest.body())
+                .build();
+
+        commentRepository.save(comment);
+
+        return new CommentDto(author, comment);
+    }
+
+    public List<CommentDto> getArticleComments(User reader, String slug) {
+        Article article = articleRepository.findBySlug(slug)
+                .orElseThrow(() -> new NoSuchElementException("게시글 ['%s'] 이 존재하지 않습니다.".formatted(slug)));
+
+        Set<Comment> comments = commentRepository.findByArticleOrderByCreatedAtDesc(article);
+
+        if (reader.isAnonymous()) {
+            return comments.stream().map(CommentDto::unfollowProfileComment).toList();
+        }
+
+        return comments.stream()
+                .map(comment -> {
+                    User commentAuthor = comment.getAuthor();
+                    System.out.println("author = " + reader.getProfile().getUsername());
+                    System.out.println("commentAuthor = " + commentAuthor.getProfile().getUsername());
+                    System.out.println("existsByFromAndTo " + followRepository.existsByFromAndTo(reader, commentAuthor));
+                    return followRepository.existsByFromAndTo(reader, commentAuthor)
+                            ? followProfileComment(comment)
+                            : unfollowProfileComment(comment);
+                }).toList();
+    }
+
+    @Transactional
+    public void deleteComment(User author, long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NoSuchElementException("댓글 ['id: %d'] 이 존재하지 않습니다.".formatted(commentId)));
+
+        if (comment.isNotPostByMe(author)) {
+            throw new IllegalArgumentException("댓글 삭제 권한이 없습니다.");
+        }
+
+        commentRepository.delete(comment);
     }
 }

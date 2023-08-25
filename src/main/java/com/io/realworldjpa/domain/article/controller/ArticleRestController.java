@@ -49,5 +49,20 @@ public class ArticleRestController {
         articleService.deleteArticle(author, slug);
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/{slug}/comments")
+    public CommentRecord postComment(User author, @PathVariable String slug, @RequestBody CommentPostRequest commentPostRequest) {
+        return new CommentRecord(articleService.createComment(author, slug, commentPostRequest));
+    }
 
+    @GetMapping("/{slug}/comments")
+    public MultipleCommentRecord getComments(User reader, @PathVariable String slug) {
+        return new MultipleCommentRecord(articleService.getArticleComments(reader, slug));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/{slug}/comments/{id}")
+    public void deleteComment(User author, @PathVariable String slug, @PathVariable(value = "id") long commentId) {
+        articleService.deleteComment(author, commentId);
+    }
 }

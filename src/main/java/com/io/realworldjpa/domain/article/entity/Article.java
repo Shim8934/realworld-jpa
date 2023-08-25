@@ -43,7 +43,7 @@ public class Article {
     private String description;
 
     @Column(name = "body", nullable = false)
-    private String content = "";
+    private String body;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ArticleTag> tagList = new HashSet<>();
@@ -60,20 +60,20 @@ public class Article {
 
     protected Article() {}
 
-    private Article(Long id, User author, String slug, String title, String description, String content, Set<ArticleTag> tagList, Set<ArticleFavorite> favoriteUsers, LocalDateTime createdAt) {
+    private Article(Long id, User author, String slug, String title, String description, String body, Set<ArticleTag> tagList, Set<ArticleFavorite> favoriteUsers, LocalDateTime createdAt) {
         this.id = id;
         this.author = author;
         this.slug = createSlugByTitle(title);
         this.title = title;
         this.description = description;
-        this.content = content;
+        this.body = body;
         this.tagList = new HashSet<>();
         this.favoriteUsers = new HashSet<>();
         this.createdAt = defaultIfNull(createdAt, LocalDateTime.now());
     }
 
-    public Article(Long id, User author, String title, String description, String content) {
-        this(null, author, null, title, description, content, null, null, null);
+    public Article(Long id, User author, String title, String description, String body) {
+        this(null, author, null, title, description, body, null, null, null);
     }
 
     private String createSlugByTitle(String title) {
@@ -127,8 +127,8 @@ public class Article {
         return description;
     }
 
-    public String getContent() {
-        return content;
+    public String getBody() {
+        return body;
     }
 
     public Set<ArticleFavorite> getFavoriteUsers() {
@@ -147,7 +147,7 @@ public class Article {
         return this.favoriteUsers.size();
     }
 
-    public boolean isNotWrittenByMe(User writer) {
+    public boolean isNotPostByMe(User writer) {
         return !this.author.equals(writer);
     }
 
@@ -160,8 +160,8 @@ public class Article {
         this.description = description;
     }
 
-    public void updateContent(String content) {
-        this.content = content;
+    public void updateBody(String body) {
+        this.body = body;
     }
 
     @Override
@@ -183,7 +183,7 @@ public class Article {
         private User author;
         private String title;
         private String description;
-        private String content;
+        private String body;
 
         public Builder() {}
 
@@ -192,7 +192,7 @@ public class Article {
             this.author = article.author;
             this.title = article.title;
             this.description = article.description;
-            this.content = article.content;
+            this.body = article.body;
         }
 
         public Builder id(Long id) {
@@ -215,13 +215,13 @@ public class Article {
             return this;
         }
 
-        public Builder content(String content) {
-            this.content = content;
+        public Builder body(String body) {
+            this.body = body;
             return this;
         }
 
         public Article build() {
-            return new Article(id, author, title, description, content);
+            return new Article(id, author, title, description, body);
         }
     }
 }
