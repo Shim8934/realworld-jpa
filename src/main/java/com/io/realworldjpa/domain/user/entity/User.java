@@ -194,7 +194,7 @@ public class User {
         }
         findFavoriteArticle(article).ifPresent(
                 articleFavorite -> {
-                    this.favoriteArticles.remove(article);
+                    this.favoriteArticles.remove(articleFavorite);
                     articleFavorite.getArticle().getFavoriteUsers().remove(articleFavorite);
                 }
         );

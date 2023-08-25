@@ -65,4 +65,16 @@ public class ArticleRestController {
     public void deleteComment(User author, @PathVariable String slug, @PathVariable(value = "id") long commentId) {
         articleService.deleteComment(author, commentId);
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/{slug}/favorite")
+    public ArticleRecord favoriteArticle(User reader, @PathVariable String slug) {
+        return new ArticleRecord(articleService.favoriteArticle(reader, slug));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/{slug}/favorite")
+    public ArticleRecord unFavoriteArticle(User reader, @PathVariable String slug) {
+        return new ArticleRecord(articleService.unFavoriteArticle(reader, slug));
+    }
 }

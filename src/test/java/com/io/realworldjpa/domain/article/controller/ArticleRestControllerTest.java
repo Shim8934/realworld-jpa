@@ -3,7 +3,6 @@ package com.io.realworldjpa.domain.article.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io.realworldjpa.IntegrationTest;
 import com.io.realworldjpa.domain.article.entity.Article;
-import com.io.realworldjpa.domain.article.entity.Comment;
 import com.io.realworldjpa.domain.article.entity.Tag;
 import com.io.realworldjpa.domain.article.model.ArticlePostRequest;
 import com.io.realworldjpa.domain.article.model.ArticlePutRequest;
@@ -44,8 +43,6 @@ class ArticleRestControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private ArticleService articleService;
     @Autowired
     private ArticleRepository articleRepository;
     @Autowired
@@ -481,6 +478,53 @@ class ArticleRestControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    @DisplayName("POST /api/articles/{slug}/favorite")
+    void Post_Favorite_Article() throws Exception {
+        // when
+        ResultActions resultActions = mockMvc.perform(post("/api/articles/{slug}/favorite", testSlug)
+                .header("Authorization", shimkiToken)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.article.title").value("How to train your dragon"))
+                .andExpect(jsonPath("$.article.favorited").value(true))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("POST /api/articles/{slug}/favorite - Already_Favorited_Expect_Error")
+    void Post_Already_Favorite_Article_Expect_Error() throws Exception {
+        // when
+        ResultActions resultActions = mockMvc.perform(post("/api/articles/{slug}/favorite", testSlug)
+                .header("Authorization", bangkiToken)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("이미 팔로우한 게시글입니다."))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/articles/{slug}/favorite")
+    void Delete_Favorite_Article() throws Exception {
+        // when
+        ResultActions resultActions = mockMvc.perform(delete("/api/articles/{slug}/favorite", testSlug)
+                .header("Authorization", shimkiToken)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.article.title").value("How to train your dragon"))
+                .andExpect(jsonPath("$.article.favorited").value(false))
+                .andDo(print());
+    }
+
     private User createTestUsers(String testName) {
         return new User.Builder()
                 .email(new Email(testName + "@example.com"))
@@ -517,6 +561,6 @@ class ArticleRestControllerTest {
             }
         }
 
-        articleRepository.save(testArticle);
+        articleRepository.saveAndFlush(testArticle);
     }
 }

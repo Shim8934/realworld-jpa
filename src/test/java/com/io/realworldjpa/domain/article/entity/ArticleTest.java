@@ -115,7 +115,6 @@ class ArticleTest {
 
         // when
         assertThatThrownBy(() -> shimki.favoriteArticle(null))
-
         // then
                 .isInstanceOf(IllegalArgumentException.class).hasMessage("게시글이 존재하지 않습니다.");
     }
@@ -148,8 +147,7 @@ class ArticleTest {
 
         // when
         assertThatThrownBy(() -> shimki.unfavoriteArticle(null))
-
-                // then
+        // then
                 .isInstanceOf(IllegalArgumentException.class).hasMessage("게시글이 존재하지 않습니다.");
     }
 }

@@ -30,8 +30,7 @@ public class ArticleService {
 
     @Transactional(readOnly = true)
     public ArticleDto getArticle(User reader, String slug) {
-        Article article = articleRepository.findBySlug(slug)
-                .orElseThrow(() -> new NoSuchElementException("게시글 ['%s'] 이 존재하지 않습니다.".formatted(slug)));
+        Article article = findArticleBySlug(slug);
         return new ArticleDto(reader, article);
     }
 
@@ -82,8 +81,7 @@ public class ArticleService {
 
     @Transactional
     public ArticleDto updateArticle(User editor, String slug, ArticlePutRequest articlePutRequest) {
-        Article article = articleRepository.findBySlug(slug)
-                .orElseThrow(() -> new NoSuchElementException("게시글 ['%s'] 이 존재하지 않습니다.".formatted(slug)));
+        Article article = findArticleBySlug(slug);
 
         if (article.isNotPostByMe(editor)) {
             throw new IllegalArgumentException("수정 권한이 없습니다.");
@@ -98,8 +96,7 @@ public class ArticleService {
 
     @Transactional
     public void deleteArticle(User author, String slug) {
-        Article article = articleRepository.findBySlug(slug)
-                .orElseThrow(() -> new NoSuchElementException("게시글 ['%s'] 이 존재하지 않습니다.".formatted(slug)));
+        Article article = findArticleBySlug(slug);
 
         if (article.isNotPostByMe(author)) {
             throw new IllegalArgumentException("삭제 권한이 없습니다.");
@@ -110,8 +107,7 @@ public class ArticleService {
 
     @Transactional
     public CommentDto createComment(User author, String slug, CommentPostRequest commentPostRequest) {
-        Article article = articleRepository.findBySlug(slug)
-                .orElseThrow(() -> new NoSuchElementException("게시글 ['%s'] 이 존재하지 않습니다.".formatted(slug)));
+        Article article = findArticleBySlug(slug);
 
         Comment comment = new Comment.Builder()
                 .article(article)
@@ -125,8 +121,7 @@ public class ArticleService {
     }
 
     public List<CommentDto> getArticleComments(User reader, String slug) {
-        Article article = articleRepository.findBySlug(slug)
-                .orElseThrow(() -> new NoSuchElementException("게시글 ['%s'] 이 존재하지 않습니다.".formatted(slug)));
+        Article article = findArticleBySlug(slug);
 
         Set<Comment> comments = commentRepository.findByArticleOrderByCreatedAtDesc(article);
 
@@ -137,9 +132,6 @@ public class ArticleService {
         return comments.stream()
                 .map(comment -> {
                     User commentAuthor = comment.getAuthor();
-                    System.out.println("author = " + reader.getProfile().getUsername());
-                    System.out.println("commentAuthor = " + commentAuthor.getProfile().getUsername());
-                    System.out.println("existsByFromAndTo " + followRepository.existsByFromAndTo(reader, commentAuthor));
                     return followRepository.existsByFromAndTo(reader, commentAuthor)
                             ? followProfileComment(comment)
                             : unfollowProfileComment(comment);
@@ -156,5 +148,28 @@ public class ArticleService {
         }
 
         commentRepository.delete(comment);
+    }
+
+    @Transactional
+    public ArticleDto favoriteArticle(User reader, String slug) {
+        Article article = findArticleBySlug(slug);
+
+        reader.favoriteArticle(article);
+
+        return new ArticleDto(reader, article);
+    }
+
+    @Transactional
+    public ArticleDto unFavoriteArticle(User reader, String slug) {
+        Article article = findArticleBySlug(slug);
+
+        reader.unfavoriteArticle(article);
+
+        return new ArticleDto(reader, article);
+    }
+
+    private Article findArticleBySlug(String slug) {
+        return articleRepository.findBySlug(slug)
+                .orElseThrow(() -> new NoSuchElementException("게시글 ['%s'] 이 존재하지 않습니다.".formatted(slug)));
     }
 }
