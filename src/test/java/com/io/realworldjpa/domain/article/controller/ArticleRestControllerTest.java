@@ -525,6 +525,20 @@ class ArticleRestControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    @DisplayName("GET /api/tags")
+    void Get_Tags() throws Exception {
+        // when
+        ResultActions resultActions = mockMvc.perform(get("/api/tags"));
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tags[0]").value("dragons"))
+                .andExpect(jsonPath("$.tags[1]").value("training"))
+                .andDo(print());
+    }
+
     private User createTestUsers(String testName) {
         return new User.Builder()
                 .email(new Email(testName + "@example.com"))

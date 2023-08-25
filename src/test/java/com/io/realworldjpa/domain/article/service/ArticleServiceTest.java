@@ -31,6 +31,8 @@ class ArticleServiceTest {
     @Autowired
     private ArticleService articleService;
     @Autowired
+    private TagService tagService;
+    @Autowired
     private ArticleRepository articleRepository;
     @Autowired
     private UserRepository userRepository;
@@ -507,6 +509,18 @@ class ArticleServiceTest {
         // then
                 .isInstanceOf(IllegalArgumentException.class).hasMessage("댓글 삭제 권한이 없습니다.");
         ;
+    }
+
+    @Test
+    @DisplayName("Get_Tags")
+    void Get_Tags() throws Exception {
+        // when
+        List<String> tags = tagService.getTags();
+
+        // then
+        assertThat(tags.size()).isEqualTo(2);
+        assertThat(tags.contains("training")).isEqualTo(true);
+        assertThat(tags.contains("dragons")).isEqualTo(true);
     }
 
     private Comment testCreateComment(User author) {
