@@ -51,10 +51,6 @@ public class Tag {
         return value;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
     @Override
     @Generated
     public String toString() {

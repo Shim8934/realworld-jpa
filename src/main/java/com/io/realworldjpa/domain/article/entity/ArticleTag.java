@@ -32,14 +32,17 @@ public class ArticleTag {
         this.tag = tag;
     }
 
+    @Generated
     public Long getId() {
         return id;
     }
 
+    @Generated
     public Article getArticle() {
         return article;
     }
 
+    @Generated
     public Tag getTag() {
         return tag;
     }
