@@ -97,10 +97,7 @@ jacocoTestReport {
     dependsOn test
     reports {
         html.enabled true
-        csv.enabled false
-        xml.enabled false
-
-        html.destination file("$buildDir/jacoco/html")
+        xml.enabled true
 
         finalizedBy 'jacocoTestCoverageVerification'
     }
