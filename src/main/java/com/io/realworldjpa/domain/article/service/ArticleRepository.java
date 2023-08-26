@@ -19,10 +19,10 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query("""
             SELECT article FROM Article article
-            WHERE (:tag IS NULL OR :tag IN (SELECT tag FROM article.tagList tag))
+            WHERE (:tag IS NULL OR :tag IN (SELECT t.tag.value FROM article.tagList t))
             AND (:author IS NULL OR article.author.profile.username = :author)
             AND (:favorited IS NULL OR :favorited IN (SELECT favoruser.user.profile.username FROM article.favoriteUsers favoruser))
-            ORDER BY article.createdAt DESC                      
+            ORDER BY article.createdAt DESC
             """)
     Page<Article> findByFilter(
             @Param("tag") String tag,

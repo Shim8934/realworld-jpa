@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -54,7 +55,6 @@ public class UserService {
     @Transactional
     public UserDto updateUser(User updateUser, UserPutRequest putRequest) {
         checkArgument(isNotEmpty(putRequest.email()), "email must not be null or blank!");
-        checkArgument(isNotEmpty(putRequest.password()), "password must be provided.");
 
         Email putEmail = new Email(putRequest.email());
         if (!updateUser.getEmail().equals(putEmail) && userRepository.existsByEmail(putEmail)) {
@@ -64,10 +64,12 @@ public class UserService {
             updateUser.updateEmail(putEmail);
         }
 
-        updateUser.updateUsername(putRequest.username());
-        updateUser.updateBio(putRequest.bio());
-        updateUser.updatePassword(Password.of(putRequest.password(), passwordEncoder));
-        updateUser.updateImage(putRequest.image());
+        updateUser.updateUsername(defaultIfNull(putRequest.username(), updateUser.getProfile().getUsername()));
+        updateUser.updateBio(defaultIfNull(putRequest.bio(), updateUser.getProfile().getBio()));
+        if (putRequest.password() != null) {
+            updateUser.updatePassword(Password.of(putRequest.password(), passwordEncoder));
+        }
+        updateUser.updateImage(defaultIfNull(putRequest.image(), updateUser.getProfile().getImage()));
 
         return new UserDto(updateUser, updateUser.getToken());
     }

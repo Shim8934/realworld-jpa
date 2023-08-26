@@ -17,7 +17,9 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.io.realworldjpa.domain.article.entity.CommentDto.*;
+import static com.io.realworldjpa.domain.article.entity.CommentDto.followProfileComment;
+import static com.io.realworldjpa.domain.article.entity.CommentDto.unfollowProfileComment;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @Service
 @RequiredArgsConstructor
@@ -36,9 +38,9 @@ public class ArticleService {
 
     @Transactional(readOnly = true)
     public List<ArticleDto> getArticles(User reader, MultipleArticleRequest multipleArticleRequest) {
-        String tag = multipleArticleRequest.tag();
-        String author = multipleArticleRequest.author();
-        String favorited = multipleArticleRequest.favorited();
+        String tag = defaultIfNull(multipleArticleRequest.tag(), null);
+        String author = defaultIfNull(multipleArticleRequest.author(), null);
+        String favorited = defaultIfNull(multipleArticleRequest.favorited(), null);
 
         Page<Article> articles = articleRepository.findByFilter(tag, author, favorited, multipleArticleRequest.getPageable());
 
@@ -87,9 +89,9 @@ public class ArticleService {
             throw new IllegalArgumentException("수정 권한이 없습니다.");
         }
 
-        article.updateTitle(articlePutRequest.title());
-        article.updateDescription(articlePutRequest.description());
-        article.updateBody(articlePutRequest.body());
+        article.updateTitle(defaultIfNull(articlePutRequest.title(), article.getTitle()));
+        article.updateDescription(defaultIfNull(articlePutRequest.description(), article.getDescription()));
+        article.updateBody(defaultIfNull(articlePutRequest.body(), article.getBody()));
 
         return new ArticleDto(editor, article);
     }

@@ -8,7 +8,6 @@ import com.io.realworldjpa.domain.article.model.ArticlePostRequest;
 import com.io.realworldjpa.domain.article.model.ArticlePutRequest;
 import com.io.realworldjpa.domain.article.model.CommentPostRequest;
 import com.io.realworldjpa.domain.article.service.ArticleRepository;
-import com.io.realworldjpa.domain.article.service.ArticleService;
 import com.io.realworldjpa.domain.user.entity.Email;
 import com.io.realworldjpa.domain.user.entity.Password;
 import com.io.realworldjpa.domain.user.entity.Profile;
@@ -23,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
