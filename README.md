@@ -66,7 +66,7 @@ build/reports/jacoco/test/html/index.html
 2) `Service Layer`에서 사용하는 domain Entity의 `Constructors` 는 언제나 직접 작성한 `Builder` 패턴으로 접근. (`@Builder` 사용 금지)  
 3) 거의 모든 **Class, Method 테스트 진행**.
     - `equals()`, `hashCode()`, `getter()` 같은 일부 **Boilerplate** 성격의 메소드는 제외.
-    - 다대다 관계를 풀어내기 위한 **Mapping Entity - ArticleTag, ArticleFavorite** 는 테스트 제외  
+    - 다대다 관계를 풀어내기 위한 **매핑 Entity - ArticleTag, ArticleFavorite** 는 테스트 제외  
 4) `Controller Layer`에서 **`Response로 Entity` 반환 금지**
 5) `Controller`, `Service Layer` 사이의 데이터 반환은 DTO로 반환
 
