@@ -82,4 +82,10 @@ build/reports/jacoco/test/html/index.html
 
 ### Entity Diagram With Method
 ![Whole_Entity_With_Method](./docs/study/Entity_Diagram_WithMethod.jpg)
-* 연관 관계 메소드 중, 내부적으로 사용하는 검증 로직은 `private`으로 사용 ()
+* 연관 관계 메소드 중, 내부적으로 사용하는 검증 로직은 `private`으로 사용 ()  
+
+---
+
+# Performance
+
+![performance](./docs/study/Test_Result.jpg)
