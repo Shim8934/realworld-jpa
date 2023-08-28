@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.List;
 import java.util.Map;
 
+import static com.io.realworldjpa.domain.user.entity.Email.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -539,7 +540,7 @@ class ArticleRestControllerTest {
 
     private User createTestUsers(String testName) {
         return new User.Builder()
-                .email(new Email(testName + "@example.com"))
+                .email(of(testName + "@example.com"))
                 .profile(Profile.of(testName, testName + "'s bio", testName + ".jpg"))
                 .password(Password.of("testPassword", passwordEncoder))
                 .build();

@@ -26,7 +26,7 @@ class ArticleTest {
     @BeforeEach
     void setupUsers() throws Exception {
         User shimki = new User.Builder()
-                .email(new Email("shimki@example.com"))
+                .email(Email.of("shimki@example.com"))
                 .profile(Profile.of("shimki", "shimki's bio", "shimki.jpg"))
                 .password(Password.of("testPassword", passwordEncoder))
                 .build();
@@ -73,7 +73,7 @@ class ArticleTest {
     @DisplayName("Favorite_Article")
     void Favorite_Article() {
         User shimki = new User.Builder()
-                .email(new Email("shimki@example.com"))
+                .email(Email.of("shimki@example.com"))
                 .profile(Profile.of("shimki", "shimki's bio", "shimki.jpg"))
                 .password(Password.of("testPassword", passwordEncoder))
                 .build();
@@ -91,7 +91,7 @@ class ArticleTest {
     @DisplayName("Favorite_Article_Repeat_Expect_Error")
     void Favorite_Repeat_Expect_Error() {
         User shimki = new User.Builder()
-                .email(new Email("shimki@example.com"))
+                .email(Email.of("shimki@example.com"))
                 .profile(Profile.of("shimki", "shimki's bio", "shimki.jpg"))
                 .password(Password.of("testPassword", passwordEncoder))
                 .build();
@@ -108,7 +108,7 @@ class ArticleTest {
     @DisplayName("Favorite_Not_Exist_Article_Expect_Error")
     void favorite_Not_Exist_Article_Expect_Error() {
         User shimki = new User.Builder()
-                .email(new Email("shimki@example.com"))
+                .email(Email.of("shimki@example.com"))
                 .profile(Profile.of("shimki", "shimki's bio", "shimki.jpg"))
                 .password(Password.of("testPassword", passwordEncoder))
                 .build();
@@ -123,7 +123,7 @@ class ArticleTest {
     @DisplayName("Unfavorite_Article")
     void Unfavorite_Article() {
         User shimki = new User.Builder()
-                .email(new Email("shimki@example.com"))
+                .email(Email.of("shimki@example.com"))
                 .profile(Profile.of("shimki", "shimki's bio", "shimki.jpg"))
                 .password(Password.of("testPassword", passwordEncoder))
                 .build();
@@ -140,7 +140,7 @@ class ArticleTest {
     @DisplayName("Unfavorite_Not_Exist_Article_Expect_Error")
     void Unfavorite_Not_Exist_Article_Expect_Error() {
         User shimki = new User.Builder()
-                .email(new Email("shimki@example.com"))
+                .email(Email.of("shimki@example.com"))
                 .profile(Profile.of("shimki", "shimki's bio", "shimki.jpg"))
                 .password(Password.of("testPassword", passwordEncoder))
                 .build();

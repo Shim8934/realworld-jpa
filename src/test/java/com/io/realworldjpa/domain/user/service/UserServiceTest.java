@@ -30,7 +30,7 @@ class UserServiceTest {
     @BeforeEach
     void setupUsers() throws Exception {
         shimki = new User.Builder()
-                .email(new Email("shimki@example.com"))
+                .email(Email.of("shimki@example.com"))
                 .profile(Profile.of("shimki", "shimki's bio", "shimki.jpg"))
                 .password(Password.of("testPassword", passwordEncoder))
                 .build();

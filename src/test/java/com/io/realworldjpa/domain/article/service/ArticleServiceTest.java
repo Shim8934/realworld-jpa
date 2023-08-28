@@ -51,19 +51,19 @@ class ArticleServiceTest {
     @BeforeEach
     void setupUsers() throws Exception {
         shimki = new User.Builder()
-                .email(new Email("shimki@example.com"))
+                .email(Email.of("shimki@example.com"))
                 .profile(Profile.of("shimki", "shimki's bio", "shimki.jpg"))
                 .password(Password.of("testPassword", passwordEncoder))
                 .build();
 
         bangki = new User.Builder()
-                .email(new Email("bangki@example.com"))
+                .email(Email.of("bangki@example.com"))
                 .profile(Profile.of("bangki", "bangki's bio", "bangki.jpg"))
                 .password(Password.of("testPassword", passwordEncoder))
                 .build();
 
         tangki = new User.Builder()
-                .email(new Email("tangki@example.com"))
+                .email(Email.of("tangki@example.com"))
                 .profile(Profile.of("tangki", "tangki's bio", "tangki.jpg"))
                 .password(Password.of("testPassword", passwordEncoder))
                 .build();

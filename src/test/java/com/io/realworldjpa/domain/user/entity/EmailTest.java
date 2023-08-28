@@ -16,7 +16,7 @@ class EmailTest {
     @Test
     @DisplayName("Generate_Regular_Email")
     void generate_regular_email() {
-        Email testEmail = new Email("shimki@example.com");
+        Email testEmail = Email.of("shimki@example.com");
 
         assertThat(testEmail.getName()).isEqualTo(NAME);
         assertThat(testEmail.getDomain()).isEqualTo(DOMAIN);
@@ -25,16 +25,16 @@ class EmailTest {
     @Test
     @DisplayName("Wrong_Email_Expect_Error")
     void generate_wrong_email_expect_error() {
-        assertThatThrownBy(() -> new Email(NAME + DOMAIN))
+        assertThatThrownBy(() -> Email.of(NAME + DOMAIN))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("Wrong_length_Expect_Error")
     void Wrong_length_expect_error() {
-        assertThatThrownBy(() -> new Email("ly@exam"))
+        assertThatThrownBy(() -> Email.of("ly@exam"))
                 .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new Email("aaaaaaaaaa" +
+        assertThatThrownBy(() -> Email.of("aaaaaaaaaa" +
                                                     "aaaaaaaaaa" +
                                                     "aaaaaaaaaa" +
                                                     "aaaaaaaaaa" +
@@ -45,9 +45,9 @@ class EmailTest {
     @Test
     @DisplayName("Equals Test")
     void equal_test() {
-        Email testEmail = new Email("shimki@example.com");
-        Email testEmail2 = new Email(EMAIL);
-        Email notEqualEmail = new Email("shimki@test.com");
+        Email testEmail = Email.of("shimki@example.com");
+        Email testEmail2 = Email.of(EMAIL);
+        Email notEqualEmail = Email.of("shimki@test.com");
 
         assertThat(testEmail.getName()).isEqualTo(NAME);
         assertThat(testEmail.getDomain()).isEqualTo(DOMAIN);

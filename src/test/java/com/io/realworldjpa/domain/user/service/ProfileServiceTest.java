@@ -30,13 +30,13 @@ class ProfileServiceTest {
     @BeforeEach
     void setupUsers() throws Exception {
         shimki = new User.Builder()
-                .email(new Email("shimki@example.com"))
+                .email(Email.of("shimki@example.com"))
                 .profile(Profile.of("shimki", "shimki's bio", "shimki.jpg"))
                 .password(Password.of("testPassword", passwordEncoder))
                 .build();
 
         bangki = new User.Builder()
-                .email(new Email("bangki@example.com"))
+                .email(Email.of("bangki@example.com"))
                 .profile(Profile.of("bangki", "bangki's bio", "bangki.jpg"))
                 .password(Password.of("testPassword", passwordEncoder))
                 .build();
@@ -49,7 +49,7 @@ class ProfileServiceTest {
     @DisplayName("Get_Profile")
     void getProfile() throws Exception {
         // given
-        shimki = userRepository.findFirstByEmail(new Email("shimki@example.com")).orElseThrow();
+        shimki = userRepository.findFirstByEmail(Email.of("shimki@example.com")).orElseThrow();
 
         // when
         ProfileDto profileOfBangki = profileService.getProfile(shimki, "bangki");
@@ -65,7 +65,7 @@ class ProfileServiceTest {
     @DisplayName("Get_Profile_Not_Exist_User")
     void getProfile_Not_Exist_User() throws Exception {
         // given
-        shimki = userRepository.findFirstByEmail(new Email("shimki@example.com")).orElseThrow();
+        shimki = userRepository.findFirstByEmail(Email.of("shimki@example.com")).orElseThrow();
 
         // when
         assertThatThrownBy(() -> profileService.getProfile(shimki, "not_existed_user"))
@@ -79,7 +79,7 @@ class ProfileServiceTest {
     @DisplayName("Follow")
     void follow_Profile() throws Exception {
         // given
-        shimki = userRepository.findFirstByEmail(new Email("shimki@example.com")).orElseThrow();
+        shimki = userRepository.findFirstByEmail(Email.of("shimki@example.com")).orElseThrow();
 
         // when
         ProfileDto profileOfBangki = profileService.follow(shimki, "bangki");
@@ -97,7 +97,7 @@ class ProfileServiceTest {
     @DisplayName("Follow_Not_Exist_User")
     void follow_Not_Exist_User() throws Exception {
         // given
-        shimki = userRepository.findFirstByEmail(new Email("shimki@example.com")).orElseThrow();
+        shimki = userRepository.findFirstByEmail(Email.of("shimki@example.com")).orElseThrow();
 
         // when
         assertThatThrownBy(() -> profileService.follow(shimki, "notUser"))
@@ -111,7 +111,7 @@ class ProfileServiceTest {
     @DisplayName("Unfollow")
     void unFollowProfile() throws Exception {
         // given
-        shimki = userRepository.findFirstByEmail(new Email("shimki@example.com")).orElseThrow();
+        shimki = userRepository.findFirstByEmail(Email.of("shimki@example.com")).orElseThrow();
 
         // when
         ProfileDto profileOfBangki = profileService.unfollow(shimki, "bangki");
@@ -127,7 +127,7 @@ class ProfileServiceTest {
     @DisplayName("Unfollow_Not_Exist_User")
     void unFollow_Not_Exist_User() throws Exception {
         // given
-        shimki = userRepository.findFirstByEmail(new Email("shimki@example.com")).orElseThrow();
+        shimki = userRepository.findFirstByEmail(Email.of("shimki@example.com")).orElseThrow();
 
         // when
         assertThatThrownBy(() -> profileService.follow(shimki, "notUser"))
