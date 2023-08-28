@@ -72,7 +72,7 @@ public class Article {
         this.createdAt = defaultIfNull(createdAt, LocalDateTime.now());
     }
 
-    public Article(Long id, User author, String title, String description, String body) {
+    private Article(Long id, User author, String title, String description, String body) {
         this(null, author, null, title, description, body, null, null, null);
     }
 

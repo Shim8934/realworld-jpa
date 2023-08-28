@@ -18,7 +18,11 @@ public class Email {
   @Column(name = "email", unique = true)
   private String address;
 
-  public Email(String address) {
+  public static Email of(String address) {
+    return new Email(address);
+  }
+
+  private Email(String address) {
     checkArgument(isNotEmpty(address), "address must be provided.");
     checkArgument(
       address.length() >= 10 && address.length() <= 50,

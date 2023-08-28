@@ -10,15 +10,15 @@ public class Password {
     @Column(name = "password", nullable = false)
     private String password;
 
-    public static Password of(String rawPassword, PasswordEncoder passwordEncoder) {
-        return new Password(passwordEncoder.encode(rawPassword));
+    protected Password() {
     }
 
     private Password(String encodedPassword) {
         this.password = encodedPassword;
     }
 
-    protected Password() {
+    public static Password of(String rawPassword, PasswordEncoder passwordEncoder) {
+        return new Password(passwordEncoder.encode(rawPassword));
     }
 
     boolean matchesPassword(String rawPassword, PasswordEncoder passwordEncoder) {

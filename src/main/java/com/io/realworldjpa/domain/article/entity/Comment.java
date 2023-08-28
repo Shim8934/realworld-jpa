@@ -52,7 +52,7 @@ public class Comment {
         this.updatedAt = updatedAt;
     }
 
-    public Comment(Long id, Article article, User author, String body) {
+    private Comment(Long id, Article article, User author, String body) {
         this(null, article, author, body, null, null);
     }
 
